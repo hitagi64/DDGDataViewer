@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Inspector</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="Res.qrc">
+    <normaloff>:/:/Res/3.ico</normaloff>:/:/Res/3.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
@@ -113,6 +117,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="Res.qrc"/>
+ </resources>
  <connections/>
 </ui>

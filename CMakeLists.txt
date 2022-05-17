@@ -24,6 +24,7 @@ set(PROJECT_SOURCES
         DDG/DDGMemoryBuffer.h DDG/DDGMemoryBuffer.cpp
         DDG/DDGTxm.h DDG/DDGTxm.cpp
         ContentTreeItem.h ContentTreeItem.cpp
+        Res.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
