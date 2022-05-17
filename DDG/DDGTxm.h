@@ -21,6 +21,14 @@ enum DDGTxmPixelFormat : uint8_t
     PSMZ16S = 0x3a
 };
 
+struct DDGImage
+{
+    int width;
+    int height;
+    // Data stored as RGBA32
+    std::shared_ptr<uint8_t> data;
+};
+
 class DDGTxm : public DDGContent
 {
 public:
@@ -34,6 +42,8 @@ public:
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
 
     virtual std::string getInfoAsString();
+
+    DDGImage convertToImage();
 private:
     static uint8_t getTxmPixelFormatBitCount(DDGTxmPixelFormat p);
     static std::string txmPixelFormatAsString(DDGTxmPixelFormat format);
@@ -50,6 +60,9 @@ private:
     uint16_t clutHeight;
 
     uint16_t misc3;
+
+    DDGMemoryBuffer clutData;
+    DDGMemoryBuffer imageData;
 };
 
 #endif // DDGTXM_H

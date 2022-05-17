@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include "ContentTreeItem.h"
 #include <QMessageBox>
+#include <QGraphicsPixmapItem>
 #include "DDG/DDGTxm.h"
 
 Inspector::Inspector(QWidget *parent)
@@ -11,7 +12,7 @@ Inspector::Inspector(QWidget *parent)
 {
     ui->setupUi(this);
 
-
+    ui->ItemView->setColumnWidth(0, 300);
 }
 
 Inspector::~Inspector()
@@ -83,10 +84,6 @@ void Inspector::renderDat()
             renderDatChildren(c, itm);
         }
     }
-    //QTreeWidgetItem *itm = new QTreeWidgetItem(ui->ItemView);
-    //itm->setData(0, 0, QVariant::fromValue(static_cast<void*>(&ddgDat)));
-    //itm->setText(0, "root");
-    //ui->ItemView->addTopLevelItem(itm);
 }
 
 void Inspector::renderDatChildren(DDGDat *dat, QTreeWidgetItem *parent)
@@ -122,5 +119,27 @@ void Inspector::on_ItemView_itemClicked(QTreeWidgetItem *item, int column)
 
     std::string txt = cItem->content->getInfoAsString();
     ui->information->setText(QString::fromStdString(txt));
+
+    DDGTxm *cI = dynamic_cast<DDGTxm*>(cItem->content);
+    if (cI != nullptr)
+    {
+        DDGImage ddgImage;
+        try {
+            ddgImage = cI->convertToImage();
+        }  catch (std::string e) {
+            QMessageBox messageBox;
+            messageBox.critical(0,"Error","An error occured while previewing DDGImage: " + QString::fromStdString(e));
+        }
+
+        QImage img(ddgImage.width, ddgImage.height, QImage::Format_RGBA8888);
+        memcpy(img.bits(), ddgImage.data.get(), ddgImage.width * ddgImage.height * 4);
+
+        QGraphicsScene* scene = new QGraphicsScene();
+        ui->preview->setScene(scene);
+        QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(img));
+        scene->addItem(item);
+        ui->preview->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+        ui->preview->show();
+    }
 }
 

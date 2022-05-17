@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1302</width>
+    <width>1295</width>
     <height>814</height>
    </rect>
   </property>
@@ -25,6 +25,30 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QTreeWidget" name="ItemView">
+       <property name="indentation">
+        <number>20</number>
+       </property>
+       <property name="animated">
+        <bool>true</bool>
+       </property>
+       <attribute name="headerCascadingSectionResizes">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="headerMinimumSectionSize">
+        <number>70</number>
+       </attribute>
+       <attribute name="headerDefaultSectionSize">
+        <number>300</number>
+       </attribute>
+       <attribute name="headerHighlightSections">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="headerShowSortIndicator" stdset="0">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="headerStretchLastSection">
+        <bool>true</bool>
+       </attribute>
        <column>
         <property name="text">
          <string>Type</string>
@@ -32,17 +56,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Info</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
          <string>Name</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Size</string>
         </property>
        </column>
       </widget>
@@ -91,7 +105,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1302</width>
+     <width>1295</width>
      <height>24</height>
     </rect>
    </property>

@@ -24,6 +24,22 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
     clutHeight = buffer.getU16(0x0C);
 
     misc3 = buffer.getU16(0xE);
+
+    unsigned int totalClutSize = (clutWidth * clutHeight * getTxmPixelFormatBitCount(clutPixelType))/8;
+    unsigned int totalImageSize = (imageWidth * imageHeight * getTxmPixelFormatBitCount(imagePixelType))/8;
+
+    // Copy clut and image data
+    clutData = DDGMemoryBuffer(totalClutSize);
+    for (int i = 0; i < totalClutSize; i++)
+    {
+        clutData.setU8(buffer.getU8(16 + i), i);
+    }
+
+    imageData = DDGMemoryBuffer(totalImageSize);
+    for (int i = 0; i < totalImageSize; i++)
+    {
+        imageData.setU8(buffer.getU8(16 + totalClutSize + i), i);
+    }
 }
 
 DDGMemoryBuffer DDGTxm::saveAsMemoryBuffer()
@@ -65,6 +81,69 @@ std::string DDGTxm::getInfoAsString()
             + "\nClut Pixel Format: " + txmPixelFormatAsString(clutPixelType)
             + "\nClut Width: " + std::to_string(clutWidth)
             + "\nClut Height: " + std::to_string(clutHeight);
+}
+
+DDGImage DDGTxm::convertToImage()
+{
+    DDGImage image;
+
+    image.width = imageWidth;
+    image.height = imageHeight;
+    image.data = std::shared_ptr<uint8_t>(new uint8_t[image.width * image.height * 4], std::default_delete<uint8_t[]>());
+
+    unsigned int totalImageSize = (imageWidth * imageHeight * getTxmPixelFormatBitCount(imagePixelType))/8;
+
+    uint8_t bpp = getTxmPixelFormatBitCount(imagePixelType);
+    if (bpp > 0)
+    {
+        unsigned int i = 0;
+        while(i < totalImageSize)
+        {
+            if (imagePixelType == PSMT4)
+            {
+                uint8_t doubleIndex = imageData.getU8(i);
+
+                uint8_t firstIndex = doubleIndex & 0xF;
+                uint8_t secondIndex = (doubleIndex >> 4) & 0xF;
+
+                image.data.get()[i*8]   = clutData.getU8(firstIndex*4);
+                image.data.get()[i*8+1] = clutData.getU8(firstIndex*4+1);
+                image.data.get()[i*8+2] = clutData.getU8(firstIndex*4+2);
+                image.data.get()[i*8+3] = clutData.getU8(firstIndex*4+3);
+
+                image.data.get()[i*8+4] = clutData.getU8(secondIndex*4+0);
+                image.data.get()[i*8+5] = clutData.getU8(secondIndex*4+1);
+                image.data.get()[i*8+6] = clutData.getU8(secondIndex*4+2);
+                image.data.get()[i*8+7] = clutData.getU8(secondIndex*4+3);
+
+                i++;
+            }
+            else if (imagePixelType == PSMT8)
+            {
+                uint8_t index = imageData.getU8(i);
+
+                image.data.get()[i*4]   = clutData.getU8(index*4);
+                image.data.get()[i*4+1] = clutData.getU8(index*4+1);
+                image.data.get()[i*4+2] = clutData.getU8(index*4+2);
+                image.data.get()[i*4+3] = clutData.getU8(index*4+3);
+
+                i++;
+            }
+            else if (imagePixelType == PSMCT32)
+            {
+                image.data.get()[i] = imageData.getU8(i);
+
+                i++;
+            }
+            else
+                throw std::string("Cannot convert to image, pixel format " + txmPixelFormatAsString(imagePixelType) + " unspported.");
+        }
+    }
+    else
+        throw std::string("Cannot convert to image, bpp was 0.");
+
+
+    return image;
 }
 
 uint8_t DDGTxm::getTxmPixelFormatBitCount(DDGTxmPixelFormat p)
@@ -144,6 +223,10 @@ std::string DDGTxm::txmPixelFormatAsString(DDGTxmPixelFormat format)
     case PSMZ16S:
         return "PSMZ16S";
     default:
+        for (int i = 0; i < 2; i++)
+        {
+
+        }
         return "Unknown";
     }
 }

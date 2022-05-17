@@ -1,6 +1,13 @@
 #include "DDGMemoryBuffer.h"
 #include <fstream>
 
+DDGMemoryBuffer::DDGMemoryBuffer()
+{
+    bufferData = std::shared_ptr<uint8_t>(new uint8_t[0], std::default_delete<uint8_t[]>());
+    bufferSize = 0;
+    bufferOffset = 0;
+}
+
 DDGMemoryBuffer::DDGMemoryBuffer(size_t size)
 {
     bufferData = std::shared_ptr<uint8_t>(new uint8_t[size], std::default_delete<uint8_t[]>());

@@ -7,6 +7,7 @@
 class DDGMemoryBuffer
 {
 public:
+    DDGMemoryBuffer();
     DDGMemoryBuffer(size_t size);
     DDGMemoryBuffer(std::string file);
     DDGMemoryBuffer(std::shared_ptr<uint8_t> bufferData, size_t bufferSize, unsigned long bufferOffset);
