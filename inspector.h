@@ -17,6 +17,9 @@ public:
     Inspector(QWidget *parent = nullptr);
     ~Inspector();
 
+    void dragEnterEvent(QDragEnterEvent *e);
+    void dropEvent(QDropEvent *e);
+
 private slots:
     void on_actionExit_triggered();
     void on_actionOpen_triggered();

@@ -5,12 +5,15 @@
 #include <QMessageBox>
 #include <QGraphicsPixmapItem>
 #include "DDG/DDGTxm.h"
+#include <QDragEnterEvent>
+#include <QMimeData>
 
 Inspector::Inspector(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Inspector)
 {
     ui->setupUi(this);
+    setAcceptDrops(true);
 
     ui->ItemView->setColumnWidth(0, 300);
 }
@@ -18,6 +21,22 @@ Inspector::Inspector(QWidget *parent)
 Inspector::~Inspector()
 {
     delete ui;
+}
+
+void Inspector::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    }
+}
+
+void Inspector::dropEvent(QDropEvent *e)
+{
+    foreach (const QUrl &url, e->mimeData()->urls()) {
+        QString fileName = url.toLocalFile();
+        parseFile(fileName.toStdString());
+        renderDat();
+    }
 }
 
 
