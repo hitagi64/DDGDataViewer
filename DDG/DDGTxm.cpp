@@ -50,8 +50,8 @@ DDGMemoryBuffer DDGTxm::saveAsMemoryBuffer()
 
 bool DDGTxm::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 {
-    if (buffer.getU8(0) != buffer.getU8(0x1))
-        return false;
+    //if (buffer.getU8(0) != buffer.getU8(0x1))
+    //    return false;
 
     DDGTxmPixelFormat imagePixelType = (DDGTxmPixelFormat)buffer.getU8(0x0);
     uint16_t imageWidth = buffer.getU16(0x2);
@@ -64,9 +64,17 @@ bool DDGTxm::possibleMatchForBuffer(DDGMemoryBuffer buffer)
     unsigned int totalClutSize = (clutWidth * clutHeight * getTxmPixelFormatBitCount(clutPixelType))/8;
     unsigned int totalImageSize = (imageWidth * imageHeight * getTxmPixelFormatBitCount(imagePixelType))/8;
 
-    // Check if calculated size of block matches the actual size.
+    if (totalImageSize == 0)
+        return false;
+
+    if (getTxmPixelFormatBitCount(imagePixelType) <= 8)
+        if (totalClutSize == 0)
+            return false;
+
+    // Check if calculated size of block matches or is slightly smaller than the actual size.
     // 16 is the header size
-    if (buffer.getSize() == 16 + totalClutSize + totalImageSize)
+    if (buffer.getSize() >= 16 + totalClutSize + totalImageSize
+        && buffer.getSize() < 16 + totalClutSize + totalImageSize + 2000)
         return true;
 
     return false;

@@ -25,14 +25,19 @@ private slots:
     void on_actionOpen_triggered();
     void on_ItemView_itemClicked(QTreeWidgetItem *item, int column);
 
+    void on_actionDat_triggered();
+
+    void on_actionTxm_triggered();
+
 private:
     Ui::Inspector *ui;
 
     void loadNewFile();
-    void parseFile(std::string filename);
+    bool parseFile(std::string filename);
     void renderDat();
     void renderDatChildren(DDGDat *d, QTreeWidgetItem *parent);
 
     std::vector<std::shared_ptr<DDGContent>> dats;
+    std::vector<std::string> datNames;
 };
 #endif // INSPECTOR_H
