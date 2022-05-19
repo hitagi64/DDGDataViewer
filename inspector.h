@@ -29,6 +29,10 @@ private slots:
 
     void on_actionTxm_triggered();
 
+    void on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+
+    void on_actionPdb_triggered();
+
 private:
     Ui::Inspector *ui;
 

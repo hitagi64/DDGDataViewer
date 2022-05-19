@@ -1,5 +1,6 @@
 #include "DDGDat.h"
 #include "DDGTxm.h"
+#include "DDGPdb.h"
 
 DDGDat::DDGDat()
 {
@@ -80,6 +81,12 @@ std::shared_ptr<DDGContent> DDGDat::findAndLoadContentFromBuffer(DDGMemoryBuffer
     else if (DDGTxm::possibleMatchForBuffer(buffer))
     {
         std::shared_ptr<DDGContent> dat = std::make_shared<DDGTxm>();
+        dat->loadFromMemoryBuffer(buffer);
+        return dat;
+    }
+    else if (DDGPdb::possibleMatchForBuffer(buffer))
+    {
+        std::shared_ptr<DDGContent> dat = std::make_shared<DDGPdb>();
         dat->loadFromMemoryBuffer(buffer);
         return dat;
     }

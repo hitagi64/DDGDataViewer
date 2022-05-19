@@ -64,17 +64,13 @@
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="QGroupBox" name="groupBox">
+       <widget class="QGroupBox" name="previewGroup">
         <property name="title">
          <string>Preview</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
-          <widget class="QGraphicsView" name="preview">
-           <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
-           </property>
-          </widget>
+          <widget class="QGraphicsView" name="preview"/>
          </item>
         </layout>
        </widget>
@@ -119,6 +115,7 @@
      </property>
      <addaction name="actionDat"/>
      <addaction name="actionTxm"/>
+     <addaction name="actionPdb"/>
     </widget>
     <addaction name="actionOpen"/>
     <addaction name="menuForce_Open"/>
@@ -146,6 +143,11 @@
   <action name="actionTxm">
    <property name="text">
     <string>Txm</string>
+   </property>
+  </action>
+  <action name="actionPdb">
+   <property name="text">
+    <string>Pdb</string>
    </property>
   </action>
  </widget>

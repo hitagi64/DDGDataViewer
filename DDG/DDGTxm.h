@@ -34,14 +34,14 @@ class DDGTxm : public DDGContent
 public:
     DDGTxm();
 
-    virtual std::string getType();
+    std::string getType();
 
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);
     DDGMemoryBuffer saveAsMemoryBuffer();
 
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
 
-    virtual std::string getInfoAsString();
+    std::string getInfoAsString();
 
     DDGImage convertToImage();
 private:

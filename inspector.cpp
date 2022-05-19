@@ -7,6 +7,9 @@
 #include "DDG/DDGTxm.h"
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QGraphicsView>
+#include "ContentPreviewer.h"
+#include "DDG/DDGPdb.h"
 
 Inspector::Inspector(QWidget *parent)
     : QMainWindow(parent)
@@ -16,6 +19,9 @@ Inspector::Inspector(QWidget *parent)
     setAcceptDrops(true);
 
     ui->ItemView->setColumnWidth(0, 300);
+
+    //delete ui->preview;
+    //ui->previewGroup->layout()->addWidget(new ContentPreviewer());
 }
 
 Inspector::~Inspector()
@@ -40,12 +46,10 @@ void Inspector::dropEvent(QDropEvent *e)
     }
 }
 
-
 void Inspector::on_actionExit_triggered()
 {
     QApplication::exit();
 }
-
 
 void Inspector::on_actionOpen_triggered()
 {
@@ -136,9 +140,9 @@ void Inspector::renderDatChildren(DDGDat *dat, QTreeWidgetItem *parent)
     }
 }
 
-void Inspector::on_ItemView_itemClicked(QTreeWidgetItem *item, int column)
+void Inspector::on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
-    ContentTreeItem *cItem = dynamic_cast<ContentTreeItem*>(item);
+    ContentTreeItem *cItem = dynamic_cast<ContentTreeItem*>(current);
     if (cItem == nullptr)
         return;
 
@@ -156,18 +160,18 @@ void Inspector::on_ItemView_itemClicked(QTreeWidgetItem *item, int column)
             messageBox.critical(0,"Error","An error occured while previewing DDGImage: " + QString::fromStdString(e));
         }
 
-        QImage img(ddgImage.width, ddgImage.height, QImage::Format_RGBA8888);
+        QImage img(ddgImage.width, ddgImage.height, QImage::Format_RGBX8888);
         memcpy(img.bits(), ddgImage.data.get(), ddgImage.width * ddgImage.height * 4);
 
+        QGraphicsView *view = ui->preview;
         QGraphicsScene* scene = new QGraphicsScene();
-        ui->preview->setScene(scene);
+        view->setScene(scene);
         QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(img));
         scene->addItem(item);
-        ui->preview->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
-        ui->preview->show();
+        view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+        view->show();
     }
 }
-
 
 void Inspector::on_actionDat_triggered()
 {
@@ -196,7 +200,6 @@ void Inspector::on_actionDat_triggered()
     renderDat();
 }
 
-
 void Inspector::on_actionTxm_triggered()
 {
     QFileDialog dialog(this);
@@ -222,5 +225,37 @@ void Inspector::on_actionTxm_triggered()
     }
 
     renderDat();
+}
+
+void Inspector::on_actionPdb_triggered()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::AnyFile);
+    QStringList fileNames;
+    if (dialog.exec())
+        fileNames = dialog.selectedFiles();
+
+    if (fileNames.size() == 0)
+        return;
+
+    this->setWindowTitle(fileNames[0]);
+
+    try {
+        DDGMemoryBuffer buffer(fileNames[0].toStdString());
+        std::shared_ptr<DDGContent> c = std::make_shared<DDGPdb>();
+        c->loadFromMemoryBuffer(buffer);
+        dats.push_back(c);
+        datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
+    }  catch (std::string e) {
+        QMessageBox messageBox;
+        messageBox.critical(0,"Error","An error occured while loading file: " + QString::fromStdString(e));
+    }
+
+    renderDat();
+}
+
+void Inspector::on_ItemView_itemClicked(QTreeWidgetItem *item, int column)
+{
+
 }
 
