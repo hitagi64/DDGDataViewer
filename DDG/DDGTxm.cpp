@@ -50,9 +50,11 @@ DDGMemoryBuffer DDGTxm::saveAsMemoryBuffer()
 
 bool DDGTxm::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 {
+    // Seems the first 2 bytes are often the same but not always
     //if (buffer.getU8(0) != buffer.getU8(0x1))
     //    return false;
 
+    // Start of the 16 byte header.
     DDGTxmPixelFormat imagePixelType = (DDGTxmPixelFormat)buffer.getU8(0x0);
     uint16_t imageWidth = buffer.getU16(0x2);
     uint16_t imageHeight = buffer.getU16(0x4);
@@ -71,8 +73,10 @@ bool DDGTxm::possibleMatchForBuffer(DDGMemoryBuffer buffer)
         if (totalClutSize == 0)
             return false;
 
-    // Check if calculated size of block matches or is slightly smaller than the actual size.
-    // 16 is the header size
+    // Check if calculated size of block matches or is slightly
+    //  smaller than the actual size.
+    // It can be slighly smaller because some files seem to be
+    //  zero padded at the end. (To fill a page maybe?)
     if (buffer.getSize() >= 16 + totalClutSize + totalImageSize
         && buffer.getSize() < 16 + totalClutSize + totalImageSize + 2000)
         return true;
