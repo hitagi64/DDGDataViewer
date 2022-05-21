@@ -5,8 +5,12 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
 
-enum ModelType
+#include "DDG/DDGContent.h"
+#include "DDG/DDGTxm.h"
+
+enum ModelDataType
 {
     MODELTYPE_VERTEX3_COLOR3,
     MODELTYPE_VERTEX3_UV2,
@@ -16,7 +20,13 @@ struct ModelData
 {
     unsigned int vao;
     unsigned int vbo;
-    ModelType type;
+    ModelDataType type;
+
+    unsigned int ebo;
+    bool usesEBO;
+
+    unsigned int drawCount;// e.g. amount of triangles or lines.
+    GLenum drawType;
 };
 
 class ContentPreviewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
@@ -24,6 +34,8 @@ class ContentPreviewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Co
     Q_OBJECT
 public:
     ContentPreviewer();
+
+    void displayContent(std::shared_ptr<DDGContent> c);
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -32,16 +44,11 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
 private:
-    std::vector<float> generateGrid(int width, int height, float spacing);
-
-    ModelData createModel(void *data, unsigned int dataSize, ModelType type);
-    void useModel(ModelData model);
-    void deleteModel(ModelData model);
-
     QMatrix4x4 projection;
     QOpenGLShaderProgram *basicShaderProgram;
+    QOpenGLShaderProgram *imagePreviewShader;
 
-    bool projectionMode2DImage;
+    bool image2DMode;
 
     float cameraRotH;
     float cameraRotV;
@@ -50,14 +57,29 @@ private:
     QPoint lastMousePos;
 
     ModelData triangle;
+    ModelData imageSurface;
     ModelData grid;
+
+    int imagePreviewTexture;// -1 if doesn't exist
 
     // Opengl
     QOpenGLShaderProgram *makeShaderProgram(QString vertexPath, QString fragmentPath);
     unsigned int makeVBO(void *data, unsigned int dataSize);
     void useVBO(unsigned int vbo);
     void deleteVBO(unsigned int vbo);
-    void glPrintError();
+
+    unsigned int makeTexture(void* data, unsigned int width, unsigned int height, GLenum type);
+    void useTexture(unsigned int tex);
+    void deleteTexture(unsigned int tex);
+
+    std::vector<float> generateGrid(int width, int height, float spacing);
+    std::vector<float> generatePlaneUV();
+
+    ModelData createModel(void *data, unsigned int dataSize, unsigned int drawCount, ModelDataType type, GLenum drawType);
+    ModelData createModelIndexed(void *data, unsigned int vertexDataSize, void *indexData, unsigned int indexDataSize, unsigned int drawCount, ModelDataType type, GLenum drawType);
+    void drawModel(ModelData model);
+    void useModel(ModelData model);
+    void deleteModel(ModelData model);
 };
 
 #endif // CONTENTPREVIEWER_H
