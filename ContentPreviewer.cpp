@@ -4,7 +4,7 @@
 #include <QMouseEvent>
 #include <iostream>
 
-ContentPreviewer::ContentPreviewer()
+ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, QOverload<>::of(&ContentPreviewer::update));
@@ -20,9 +20,13 @@ ContentPreviewer::ContentPreviewer()
     imagePreviewTexture = -1;
 }
 
-void ContentPreviewer::displayContent(std::shared_ptr<DDGContent> c)
+void ContentPreviewer::displayContent(DDGContent *c)
 {
-    DDGTxm *cI = dynamic_cast<DDGTxm*>(c.get());
+    // c may not be used outside this function
+
+    image2DMode = false;
+
+    DDGTxm *cI = dynamic_cast<DDGTxm*>(c);
     if (cI != nullptr)
     {
         DDGImage img = cI->convertToImage();
@@ -152,18 +156,21 @@ void ContentPreviewer::mousePressEvent(QMouseEvent *event)
 
 void ContentPreviewer::mouseMoveEvent(QMouseEvent *event)
 {
-    int dx = event->x() - lastMousePos.x();
-    int dy = event->y() - lastMousePos.y();
-
-    if (event->buttons() & Qt::LeftButton)
+    if (!image2DMode)
     {
-        cameraRotH -= dx/2.0f;
+        int dx = event->x() - lastMousePos.x();
+        int dy = event->y() - lastMousePos.y();
 
-        cameraRotV -= dy/2.0f;
-        if (cameraRotV < -90)
-            cameraRotV = -90;
-        if (cameraRotV > 90)
-            cameraRotV = 90;
+        if (event->buttons() & Qt::LeftButton)
+        {
+            cameraRotH -= dx/2.0f;
+
+            cameraRotV -= dy/2.0f;
+            if (cameraRotV < -90)
+                cameraRotV = -90;
+            if (cameraRotV > 90)
+                cameraRotV = 90;
+        }
     }
 
     lastMousePos = event->pos();
@@ -171,9 +178,16 @@ void ContentPreviewer::mouseMoveEvent(QMouseEvent *event)
 
 void ContentPreviewer::wheelEvent(QWheelEvent *event)
 {
+    if (image2DMode)
+        return;
     distanceFromCamera += event->angleDelta().y()/-30.0f;
     if (distanceFromCamera < 0.2)
         distanceFromCamera = 0.2;
+}
+
+QSize ContentPreviewer::sizeHint() const
+{
+    return {300, 300};
 }
 
 std::vector<float> ContentPreviewer::generateGrid(int width, int height, float spacing)
@@ -364,7 +378,10 @@ unsigned int ContentPreviewer::makeTexture(void *data, unsigned int width, unsig
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, type, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    //glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    return tex;
 }
 
 void ContentPreviewer::useTexture(unsigned int tex)

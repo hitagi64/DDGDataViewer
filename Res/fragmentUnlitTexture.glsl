@@ -7,5 +7,6 @@ uniform sampler2D texIn;
 
 void main()
 {
-    result = texture(texin, uv);
+    result = texture(texIn, uv);
+    //result = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 } 

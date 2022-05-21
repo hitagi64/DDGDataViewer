@@ -18,7 +18,7 @@ Inspector::Inspector(QWidget *parent)
     ui->setupUi(this);
     setAcceptDrops(true);
 
-    ui->ItemView->setColumnWidth(0, 300);
+    ui->ItemView->setColumnWidth(0, 200);
 
     //delete ui->preview;
     //ui->previewGroup->layout()->addWidget(new ContentPreviewer());
@@ -149,7 +149,9 @@ void Inspector::on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWi
     std::string txt = cItem->content->getInfoAsString();
     ui->information->setText(QString::fromStdString(txt));
 
-    DDGTxm *cI = dynamic_cast<DDGTxm*>(cItem->content);
+    ui->previewer->displayContent(cItem->content);
+
+    /*DDGTxm *cI = dynamic_cast<DDGTxm*>(cItem->content);
     if (cI != nullptr)
     {
         DDGImage ddgImage;
@@ -163,6 +165,8 @@ void Inspector::on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWi
         QImage img(ddgImage.width, ddgImage.height, QImage::Format_RGBX8888);
         memcpy(img.bits(), ddgImage.data.get(), ddgImage.width * ddgImage.height * 4);
 
+        ui->previewer->displayContent(cItem->content);
+
         QGraphicsView *view = ui->preview;
         QGraphicsScene* scene = new QGraphicsScene();
         view->setScene(scene);
@@ -170,7 +174,7 @@ void Inspector::on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWi
         scene->addItem(item);
         view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
         view->show();
-    }
+    }*/
 }
 
 void Inspector::on_actionDat_triggered()

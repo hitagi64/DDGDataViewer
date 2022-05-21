@@ -33,9 +33,9 @@ class ContentPreviewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Co
 {
     Q_OBJECT
 public:
-    ContentPreviewer();
+    ContentPreviewer(QWidget *parent);
 
-    void displayContent(std::shared_ptr<DDGContent> c);
+    void displayContent(DDGContent *c);
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -43,6 +43,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    QSize sizeHint() const override;
 private:
     QMatrix4x4 projection;
     QOpenGLShaderProgram *basicShaderProgram;
