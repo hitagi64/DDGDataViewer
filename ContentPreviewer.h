@@ -18,13 +18,13 @@ enum ModelDataType
 
 struct ModelData
 {
-    unsigned int vao;
-    unsigned int vbo;
+    unsigned int vao = 0;
+    unsigned int vbo = 0;
 
-    unsigned int ebo;
-    bool usesEBO;
+    unsigned int ebo = 0;
+    bool usesEBO = false;
 
-    unsigned int drawCount;// e.g. amount of triangles or lines.
+    unsigned int drawCount = 0;// e.g. amount of triangles or lines.
     GLenum drawType;
 };
 
@@ -65,7 +65,8 @@ private:
 
     // image2DMode
     ModelData imageSurface;
-    int imagePreviewTexture;// -1 if doesn't exist
+    unsigned int imagePreviewTexture;// 0 if doesn't exist
+    float imageAspectRatio;
 
     // pdmMode
     ModelData boundsModel;

@@ -21,7 +21,7 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 
     distanceFromCamera = 10;
 
-    imagePreviewTexture = -1;
+    imagePreviewTexture = 0;
 }
 
 void ContentPreviewer::displayContent(DDGContent *c)
@@ -37,11 +37,11 @@ void ContentPreviewer::displayContent(DDGContent *c)
     {
         DDGImage img = cI->convertToImage();
 
-        if (imagePreviewTexture != -1)
+        if (imagePreviewTexture != 0)
             deleteTexture(imagePreviewTexture);
 
         imagePreviewTexture = makeTexture(img.data.get(), img.width, img.height, GL_RGBA);
-
+        imageAspectRatio = ((float)img.width) / img.height;
         image2DMode = true;
     }
     DDGPdb *cM = dynamic_cast<DDGPdb*>(c);
@@ -49,6 +49,8 @@ void ContentPreviewer::displayContent(DDGContent *c)
     {
         std::vector<DDGVector4> bounds = cM->getBoundsVertices();
 
+        if (boundsModel.vao != 0)
+            deleteModel(boundsModel);
         boundsModel = createModel(bounds.data(), bounds.size()*sizeof(DDGVector4),
                 bounds.size(), MODELTYPE_4F, GL_POINTS);
 
@@ -117,10 +119,12 @@ void ContentPreviewer::initializeGL()
 void ContentPreviewer::resizeGL(int w, int h)
 {
     projection.setToIdentity();
-    double p = qreal(width())/qreal(height() > 0 ? height() : 1);
+    // Multiply height with imageAspectRatio because the plane is square and thus
+    //  the view must be stretched to restore the original aspect ratio.
+    double p = qreal(width())/qreal(height() > 0 ? height()*imageAspectRatio : 1);
     if (image2DMode)
     {
-        if (p > 1)
+        if (p > 1.0)
             projection.ortho(-p, p, -1, 1, 0.01f, 100.0);
         else
             projection.ortho(-1, 1, -(1/p), (1/p), 0.01f, 100.0);
@@ -284,23 +288,23 @@ std::vector<float> ContentPreviewer::generatePlaneUV()
 {
     float vertices[] = {
         -1.0f, -1.0f, 0.0f,// Bottom left
-         0.0f, 0.0f,
-
-        -1.0f, 1.0f, 0.0f,// Top left
-         0.0f, 1.0f,
-
-         1.0f, 1.0f, 0.0f,// Top right
          1.0f, 1.0f,
 
-
-        -1.0f, -1.0f, 0.0f,// Bottom left
-         0.0f, 0.0f,
-
-         1.0f, -1.0f, 0.0f,// Bottom right
+        -1.0f, 1.0f, 0.0f,// Top left
          1.0f, 0.0f,
 
          1.0f, 1.0f, 0.0f,// Top right
+         0.0f, 0.0f,
+
+
+        -1.0f, -1.0f, 0.0f,// Bottom left
          1.0f, 1.0f,
+
+         1.0f, -1.0f, 0.0f,// Bottom right
+         0.0f, 1.0f,
+
+         1.0f, 1.0f, 0.0f,// Top right
+         0.0f, 0.0f,
     };
 
     return std::vector<float>(std::begin(vertices), std::end(vertices));
@@ -457,11 +461,8 @@ unsigned int ContentPreviewer::makeVBO(void *data, unsigned int dataSize)
 {
     unsigned int vbo;
     glGenBuffers(1, &vbo);
-    std::cout << glGetError() << std::endl;
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    std::cout << glGetError() << std::endl;
     glBufferData(GL_ARRAY_BUFFER, dataSize, data, GL_STATIC_DRAW);
-    std::cout << glGetError() << std::endl;
 
     return vbo;
 }
