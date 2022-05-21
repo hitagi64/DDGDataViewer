@@ -44,6 +44,8 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     QSize sizeHint() const override;
 private:
+    void recalculateProjection();
+
     QMatrix4x4 projection;
     QOpenGLShaderProgram *basicShaderProgram;
     QOpenGLShaderProgram *imagePreviewShader;
@@ -70,6 +72,7 @@ private:
 
     // pdmMode
     ModelData boundsModel;
+    ModelData seg1Model;
 
     // Opengl
     QOpenGLShaderProgram *makeShaderProgram(QString vertexPath, QString fragmentPath);

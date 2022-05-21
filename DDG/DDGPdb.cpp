@@ -175,7 +175,7 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
 
         // Move past first array of whatever and skip the 4 bytes
         //  of data after it again.
-        bufferCursor += (verticesCount * 16) + 4;
+        bufferCursor += (verticesCount * 6) + 4;
 
         // Read the second array with 2x u16's.
         // I think these are uv's but I dont know in what format.
@@ -188,6 +188,13 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
 
             seg.buf2.push_back(v);
         }
+
+        // Move past second array of probably uv's.
+        bufferCursor += (verticesCount * 4);
+
+        // Files seem to 16 align here again
+        if (bufferCursor % 16 != 0)
+            bufferCursor += 16 - (bufferCursor%16);
     }
 
     return seg;
@@ -232,4 +239,19 @@ std::string DDGPdb::getInfoAsString()
 std::vector<DDGVector4> DDGPdb::getBoundsVertices()
 {
     return boundsVertices;
+}
+
+DDGModelSegment DDGPdb::getModelSegment1()
+{
+    return segment1;
+}
+
+DDGModelSegment DDGPdb::getModelSegment2()
+{
+    return segment2;
+}
+
+DDGModelSegment DDGPdb::getModelSegment3()
+{
+    return segment3;
 }

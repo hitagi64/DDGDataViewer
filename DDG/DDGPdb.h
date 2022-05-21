@@ -46,6 +46,9 @@ public:
     std::string getInfoAsString();
 
     std::vector<DDGVector4> getBoundsVertices();
+    DDGModelSegment getModelSegment1();
+    DDGModelSegment getModelSegment2();
+    DDGModelSegment getModelSegment3();
 private:
     std::vector<DDGVector4> boundsVertices;
 

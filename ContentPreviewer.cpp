@@ -54,8 +54,74 @@ void ContentPreviewer::displayContent(DDGContent *c)
         boundsModel = createModel(bounds.data(), bounds.size()*sizeof(DDGVector4),
                 bounds.size(), MODELTYPE_4F, GL_POINTS);
 
+        DDGModelSegment seg1 = cM->getModelSegment1();
+
+        // Vertices will be in the format 3f pos, 3f norm
+        std::vector<float> vertices;
+
+        bool lastStripW = false;
+        unsigned int stripCount = 0;// Triangles since strip begin
+        // A strip will start with 2 vertices where the w is not exactly 0
+        for (int i = 0; i < seg1.vertices.size(); i++)
+        {
+            if (!lastStripW && seg1.vertices[i].w > 0)
+                stripCount = 0;
+            stripCount++;
+            lastStripW = seg1.vertices[i].w > 0;
+            std::cout << (lastStripW > 0) << " sc:" << stripCount << std::endl;
+
+            if (stripCount >= 3 && i > 2)
+            {
+                QVector3D A = QVector3D(
+                            seg1.vertices[i-1].x - seg1.vertices[i-2].x,
+                            seg1.vertices[i-1].y - seg1.vertices[i-2].y,
+                            seg1.vertices[i-1].z - seg1.vertices[i-2].z);
+                QVector3D B = QVector3D(
+                            seg1.vertices[i].x - seg1.vertices[i-2].x,
+                            seg1.vertices[i].y - seg1.vertices[i-2].y,
+                            seg1.vertices[i].z - seg1.vertices[i-2].z);
+                QVector3D normal = QVector3D((A.y() * B.z()) - (A.z() * B.y()),
+                                             (A.z() * B.x()) - (A.x() * B.z()),
+                                             (A.x() * B.y()) - (A.y() * B.x()));
+
+                // Vertex 1
+                vertices.push_back(seg1.vertices[i-2].x);
+                vertices.push_back(seg1.vertices[i-2].y);
+                vertices.push_back(seg1.vertices[i-2].z);
+
+                vertices.push_back(normal.x());
+                vertices.push_back(normal.y());
+                vertices.push_back(normal.z());
+
+                // Vertex 2
+                vertices.push_back(seg1.vertices[i-1].x);
+                vertices.push_back(seg1.vertices[i-1].y);
+                vertices.push_back(seg1.vertices[i-1].z);
+
+                vertices.push_back(normal.x());
+                vertices.push_back(normal.y());
+                vertices.push_back(normal.z());
+
+                // Vertex 3
+                vertices.push_back(seg1.vertices[i].x);
+                vertices.push_back(seg1.vertices[i].y);
+                vertices.push_back(seg1.vertices[i].z);
+
+                vertices.push_back(normal.x());
+                vertices.push_back(normal.y());
+                vertices.push_back(normal.z());
+            }
+        }
+
+        if (seg1Model.vao != 0)
+            deleteModel(seg1Model);
+        seg1Model = createModel(vertices.data(), vertices.size()*sizeof(float),
+                vertices.size()/6, MODELTYPE_3F_3F, GL_TRIANGLES);
+
         pdmMode = true;
     }
+
+    recalculateProjection();
 }
 
 void ContentPreviewer::initializeGL()
@@ -118,19 +184,7 @@ void ContentPreviewer::initializeGL()
 
 void ContentPreviewer::resizeGL(int w, int h)
 {
-    projection.setToIdentity();
-    // Multiply height with imageAspectRatio because the plane is square and thus
-    //  the view must be stretched to restore the original aspect ratio.
-    double p = qreal(width())/qreal(height() > 0 ? height()*imageAspectRatio : 1);
-    if (image2DMode)
-    {
-        if (p > 1.0)
-            projection.ortho(-p, p, -1, 1, 0.01f, 100.0);
-        else
-            projection.ortho(-1, 1, -(1/p), (1/p), 0.01f, 100.0);
-    }
-    else
-        projection.perspective(45, qreal(width())/qreal(height() > 0 ? height() : 1), 0.1f, 10000.0f);
+    recalculateProjection();
 }
 
 void ContentPreviewer::paintGL()
@@ -180,6 +234,10 @@ void ContentPreviewer::paintGL()
             greenUnlitShader->bind();
             greenUnlitShader->setUniformValue("mvp", mvp);
             drawModel(boundsModel);
+
+            litShader->bind();
+            litShader->setUniformValue("mvp", mvp);
+            drawModel(seg1Model);
         }
         else
         {
@@ -237,6 +295,23 @@ void ContentPreviewer::wheelEvent(QWheelEvent *event)
 QSize ContentPreviewer::sizeHint() const
 {
     return {300, 300};
+}
+
+void ContentPreviewer::recalculateProjection()
+{
+    projection.setToIdentity();
+    // Multiply height with imageAspectRatio because the plane is square and thus
+    //  the view must be stretched to restore the image original aspect ratio.
+    double p = qreal(width())/qreal(height() > 0 ? height()*imageAspectRatio : 1);
+    if (image2DMode)
+    {
+        if (p > 1.0)
+            projection.ortho(-p, p, -1, 1, 0.01f, 100.0);
+        else
+            projection.ortho(-1, 1, -(1/p), (1/p), 0.01f, 100.0);
+    }
+    else
+        projection.perspective(45, qreal(width())/qreal(height() > 0 ? height() : 1), 0.1f, 10000.0f);
 }
 
 std::vector<float> ContentPreviewer::generateGrid(int width, int height, float spacing)
