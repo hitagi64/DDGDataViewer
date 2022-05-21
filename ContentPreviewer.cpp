@@ -4,6 +4,9 @@
 #include <QMouseEvent>
 #include <iostream>
 
+#include "DDG/DDGTxm.h"
+#include "DDG/DDGPdb.h"
+
 ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {
     QTimer *timer = new QTimer(this);
@@ -11,6 +14,7 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
     timer->start(10);
 
     image2DMode = false;
+    pdmMode = false;
 
     cameraRotH = 0;
     cameraRotV = 0;
@@ -23,19 +27,32 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 void ContentPreviewer::displayContent(DDGContent *c)
 {
     // c may not be used outside this function
+    QOpenGLWidget::makeCurrent();
 
     image2DMode = false;
+    pdmMode = false;
 
     DDGTxm *cI = dynamic_cast<DDGTxm*>(c);
     if (cI != nullptr)
     {
         DDGImage img = cI->convertToImage();
-        image2DMode = true;
 
         if (imagePreviewTexture != -1)
             deleteTexture(imagePreviewTexture);
 
         imagePreviewTexture = makeTexture(img.data.get(), img.width, img.height, GL_RGBA);
+
+        image2DMode = true;
+    }
+    DDGPdb *cM = dynamic_cast<DDGPdb*>(c);
+    if (cM != nullptr)
+    {
+        std::vector<DDGVector4> bounds = cM->getBoundsVertices();
+
+        boundsModel = createModel(bounds.data(), bounds.size()*sizeof(DDGVector4),
+                bounds.size(), MODELTYPE_4F, GL_POINTS);
+
+        pdmMode = true;
     }
 }
 
@@ -70,20 +87,31 @@ void ContentPreviewer::initializeGL()
 
     basicShaderProgram = makeShaderProgram("Res/vertex.glsl", "Res/fragment.glsl");
     basicShaderProgram->link();
-    basicShaderProgram->bind();
 
     imagePreviewShader = makeShaderProgram("Res/vertexUnlitTexture.glsl", "Res/fragmentUnlitTexture.glsl");
     imagePreviewShader->link();
-    imagePreviewShader->bind();
 
-    triangle = createModel(vertices, sizeof(vertices), 3, MODELTYPE_VERTEX3_COLOR3, GL_TRIANGLES);
+    litShader = makeShaderProgram("Res/whiteLitVertex.glsl", "Res/whiteLitFragment.glsl");
+    litShader->link();
+
+    greenUnlitShader = makeShaderProgram("Res/greenUnlitVertex.glsl", "Res/greenUnlitFragment.glsl");
+    greenUnlitShader->link();
+
+    triangle = createModel(vertices, sizeof(vertices),
+                           3, MODELTYPE_3F_3F, GL_TRIANGLES);
     //triangle = createModelIndexed(vertices, sizeof(vertices), indices, sizeof(indices), 9, MODELTYPE_VERTEX3_COLOR3, GL_TRIANGLES);
 
     std::vector<float> planeData = generatePlaneUV();
-    imageSurface = createModel(&planeData[0], planeData.size()*sizeof(float), planeData.size(), MODELTYPE_VERTEX3_UV2, GL_TRIANGLES);
+    imageSurface = createModel(&planeData[0], planeData.size()*sizeof(float),
+            planeData.size()/5, MODELTYPE_3F_2F, GL_TRIANGLES);
 
     std::vector<float> gridData = generateGrid(20, 20, 1);
-    grid = createModel(&gridData[0], gridData.size()*sizeof(float), gridData.size(), MODELTYPE_VERTEX3_COLOR3, GL_LINES);
+    grid = createModel(&gridData[0], gridData.size()*sizeof(float),
+            gridData.size()/6, MODELTYPE_3F_3F, GL_LINES);
+
+    std::vector<float> cubeData = generateCubeNormal();
+    cube = createModel(&cubeData[0], cubeData.size()*sizeof(float),
+           cubeData.size()/6, MODELTYPE_3F_3F, GL_TRIANGLES);
 }
 
 void ContentPreviewer::resizeGL(int w, int h)
@@ -141,10 +169,27 @@ void ContentPreviewer::paintGL()
         QMatrix4x4 mvp;
         mvp = projection * view * model;
 
+        if (pdmMode)
+        {
+            glPointSize(10);
+
+            greenUnlitShader->bind();
+            greenUnlitShader->setUniformValue("mvp", mvp);
+            drawModel(boundsModel);
+        }
+        else
+        {
+            litShader->bind();
+            litShader->setUniformValue("mvp", mvp);
+            drawModel(cube);
+
+            basicShaderProgram->bind();
+            basicShaderProgram->setUniformValue("mvp", mvp);
+            drawModel(triangle);
+        }
+
         basicShaderProgram->bind();
         basicShaderProgram->setUniformValue("mvp", mvp);
-
-        drawModel(triangle);
         drawModel(grid);
     }
 }
@@ -261,6 +306,55 @@ std::vector<float> ContentPreviewer::generatePlaneUV()
     return std::vector<float>(std::begin(vertices), std::end(vertices));
 }
 
+std::vector<float> ContentPreviewer::generateCubeNormal()
+{
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+    };
+
+    return std::vector<float>(std::begin(vertices), std::end(vertices));
+}
+
 ModelData ContentPreviewer::createModel(void *data, unsigned int dataSize,
                                         unsigned int drawCount, ModelDataType type,
                                         GLenum drawType)
@@ -271,12 +365,11 @@ ModelData ContentPreviewer::createModel(void *data, unsigned int dataSize,
     model.drawType = drawType;
 
     glGenVertexArrays(1, &model.vao);
+    glBindVertexArray(model.vao);
 
     model.vbo = makeVBO(data, dataSize);
 
-    glBindVertexArray(model.vao);
-
-    if (type == MODELTYPE_VERTEX3_COLOR3)
+    if (type == MODELTYPE_3F_3F)
     {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
         glEnableVertexAttribArray(0);
@@ -284,7 +377,7 @@ ModelData ContentPreviewer::createModel(void *data, unsigned int dataSize,
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
         glEnableVertexAttribArray(1);
     }
-    else if (type == MODELTYPE_VERTEX3_UV2)
+    else if (type == MODELTYPE_3F_2F)
     {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
         glEnableVertexAttribArray(0);
@@ -292,7 +385,15 @@ ModelData ContentPreviewer::createModel(void *data, unsigned int dataSize,
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
         glEnableVertexAttribArray(1);
     }
-
+    else if (type == MODELTYPE_4F)
+    {
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+    }
+    else
+    {
+        std::cerr << "Unknown model type!" << std::endl;
+    }
 
     return model;
 }
@@ -356,8 +457,11 @@ unsigned int ContentPreviewer::makeVBO(void *data, unsigned int dataSize)
 {
     unsigned int vbo;
     glGenBuffers(1, &vbo);
+    std::cout << glGetError() << std::endl;
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    std::cout << glGetError() << std::endl;
     glBufferData(GL_ARRAY_BUFFER, dataSize, data, GL_STATIC_DRAW);
+    std::cout << glGetError() << std::endl;
 
     return vbo;
 }

@@ -35,12 +35,9 @@ public:
     DDGTxm();
 
     std::string getType();
-
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);
     DDGMemoryBuffer saveAsMemoryBuffer();
-
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
-
     std::string getInfoAsString();
 
     DDGImage convertToImage();

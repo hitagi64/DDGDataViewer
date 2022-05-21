@@ -39,15 +39,13 @@ public:
     DDGPdb();
 
     std::string getType();
-
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);
     DDGMemoryBuffer saveAsMemoryBuffer();
-
     DDGModelSegment readModelSegment(DDGMemoryBuffer buffer);
-
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
-
     std::string getInfoAsString();
+
+    std::vector<DDGVector4> getBoundsVertices();
 private:
     std::vector<DDGVector4> boundsVertices;
 

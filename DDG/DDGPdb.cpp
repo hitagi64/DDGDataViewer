@@ -228,3 +228,8 @@ std::string DDGPdb::getInfoAsString()
 
     return ret;
 }
+
+std::vector<DDGVector4> DDGPdb::getBoundsVertices()
+{
+    return boundsVertices;
+}

@@ -8,19 +8,18 @@
 #include <QOpenGLTexture>
 
 #include "DDG/DDGContent.h"
-#include "DDG/DDGTxm.h"
 
 enum ModelDataType
 {
-    MODELTYPE_VERTEX3_COLOR3,
-    MODELTYPE_VERTEX3_UV2,
+    MODELTYPE_3F_3F,
+    MODELTYPE_3F_2F,
+    MODELTYPE_4F,
 };
 
 struct ModelData
 {
     unsigned int vao;
     unsigned int vbo;
-    ModelDataType type;
 
     unsigned int ebo;
     bool usesEBO;
@@ -48,8 +47,11 @@ private:
     QMatrix4x4 projection;
     QOpenGLShaderProgram *basicShaderProgram;
     QOpenGLShaderProgram *imagePreviewShader;
+    QOpenGLShaderProgram *litShader;
+    QOpenGLShaderProgram *greenUnlitShader;
 
     bool image2DMode;
+    bool pdmMode;
 
     float cameraRotH;
     float cameraRotV;
@@ -58,10 +60,15 @@ private:
     QPoint lastMousePos;
 
     ModelData triangle;
-    ModelData imageSurface;
     ModelData grid;
+    ModelData cube;
 
+    // image2DMode
+    ModelData imageSurface;
     int imagePreviewTexture;// -1 if doesn't exist
+
+    // pdmMode
+    ModelData boundsModel;
 
     // Opengl
     QOpenGLShaderProgram *makeShaderProgram(QString vertexPath, QString fragmentPath);
@@ -75,6 +82,7 @@ private:
 
     std::vector<float> generateGrid(int width, int height, float spacing);
     std::vector<float> generatePlaneUV();
+    std::vector<float> generateCubeNormal();
 
     ModelData createModel(void *data, unsigned int dataSize, unsigned int drawCount, ModelDataType type, GLenum drawType);
     ModelData createModelIndexed(void *data, unsigned int vertexDataSize, void *indexData, unsigned int indexDataSize, unsigned int drawCount, ModelDataType type, GLenum drawType);
