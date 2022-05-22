@@ -90,7 +90,6 @@ public:
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);
     DDGMemoryBuffer saveAsMemoryBuffer();
-    DDGModelSegment readModelSegment(DDGMemoryBuffer buffer);
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
     std::string getInfoAsString();
 
@@ -105,6 +104,9 @@ private:
     DDGModelSegment segment1;
     DDGModelSegment segment2;
     DDGModelSegment segment3;
+
+    DDGModelSegment readModelSegment(DDGMemoryBuffer buffer);
+    float fixedPoint412BitToFloat(uint16_t v);
 };
 
 #endif // DDGPDB_H

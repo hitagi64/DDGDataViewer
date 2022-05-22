@@ -192,15 +192,15 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
         bufferCursor += (verticesCount * 6) + 4;
 
         // Read the array with UV's.
-        // These are in fixed point format of 16 bit.
+        // These are in fixed point format of 12 bit.
         for (int i = 0; i < verticesCount; i++)
         {
             DDGVector2 v;
             uint16_t x = buffer.getU16(bufferCursor + (i*4));
-            v.x = ((float)x)/65535.0f;
+            v.x = fixedPoint412BitToFloat(x);
 
             uint16_t y = buffer.getU16(bufferCursor + (i*4) + 2);
-            v.y = ((float)y)/65535.0f;
+            v.y = fixedPoint412BitToFloat(y);
 
             seg.vertexSegments.back().UVs.push_back(v);
         }
@@ -214,6 +214,26 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
     }
 
     return seg;
+}
+
+float DDGPdb::fixedPoint412BitToFloat(uint16_t v)
+{
+    // This function is so bad.
+    // Please rewrite
+
+    union U2I {
+        int16_t s;
+        uint16_t u;
+    } u2i;
+
+    u2i.u = (v >> 12) & 7;
+    bool vSign = (v >> 15) & 1;
+    int16_t vSigned = u2i.s | (((uint16_t)vSign) << 15);
+    float vDec = (((float)(v & 4095))/4095.0f);
+    if (!vSign)
+        return ((float)vSigned) + vDec;
+    else
+        return ((float)vSigned) - vDec;
 }
 
 bool DDGPdb::possibleMatchForBuffer(DDGMemoryBuffer buffer)
