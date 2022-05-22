@@ -255,3 +255,63 @@ DDGModelSegment DDGPdb::getModelSegment3()
 {
     return segment3;
 }
+
+std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGModelSegment &segment)
+{
+    // Vertices will be in the format 3f pos, 3f norm
+    std::vector<float> vertices;
+
+    bool lastStripW = false;
+    unsigned int stripCount = 0;// Triangles since strip begin
+    // A strip will start with 2 vertices where the w is not exactly 0
+    for (int i = 0; i < segment.vertices.size(); i++)
+    {
+        if (!lastStripW && segment.vertices[i].w > 0)
+            stripCount = 0;
+        stripCount++;
+        lastStripW = segment.vertices[i].w > 0;
+
+        if (stripCount >= 3 && i >= 2)
+        {
+            DDGVector3 A = DDGVector3(
+                        segment.vertices[i-1].x - segment.vertices[i-2].x,
+                        segment.vertices[i-1].y - segment.vertices[i-2].y,
+                        segment.vertices[i-1].z - segment.vertices[i-2].z);
+            DDGVector3 B = DDGVector3(
+                        segment.vertices[i].x - segment.vertices[i-2].x,
+                        segment.vertices[i].y - segment.vertices[i-2].y,
+                        segment.vertices[i].z - segment.vertices[i-2].z);
+            DDGVector3 normal = DDGVector3((A.y * B.z) - (A.z * B.y),
+                                         (A.z * B.x) - (A.x * B.z),
+                                         (A.x * B.y) - (A.y * B.x));
+
+            // Vertex 1
+            vertices.push_back(segment.vertices[i-2].x);
+            vertices.push_back(segment.vertices[i-2].y);
+            vertices.push_back(segment.vertices[i-2].z);
+
+            vertices.push_back(normal.x);
+            vertices.push_back(normal.y);
+            vertices.push_back(normal.z);
+
+            // Vertex 2
+            vertices.push_back(segment.vertices[i-1].x);
+            vertices.push_back(segment.vertices[i-1].y);
+            vertices.push_back(segment.vertices[i-1].z);
+
+            vertices.push_back(normal.x);
+            vertices.push_back(normal.y);
+            vertices.push_back(normal.z);
+
+            // Vertex 3
+            vertices.push_back(segment.vertices[i].x);
+            vertices.push_back(segment.vertices[i].y);
+            vertices.push_back(segment.vertices[i].z);
+
+            vertices.push_back(normal.x);
+            vertices.push_back(normal.y);
+            vertices.push_back(normal.z);
+        }
+    }
+    return vertices;
+}

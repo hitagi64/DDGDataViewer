@@ -55,67 +55,22 @@ void ContentPreviewer::displayContent(DDGContent *c)
                 bounds.size(), MODELTYPE_4F, GL_POINTS);
 
         DDGModelSegment seg1 = cM->getModelSegment1();
+        DDGModelSegment seg2 = cM->getModelSegment2();
+        DDGModelSegment seg3 = cM->getModelSegment3();
 
-        // Vertices will be in the format 3f pos, 3f norm
+        std::vector<float> vertices1 = DDGPdb::convertSegmentToVertexArray(seg1);
+        std::vector<float> vertices2 = DDGPdb::convertSegmentToVertexArray(seg2);
+        std::vector<float> vertices3 = DDGPdb::convertSegmentToVertexArray(seg3);
+
         std::vector<float> vertices;
-
-        bool lastStripW = false;
-        unsigned int stripCount = 0;// Triangles since strip begin
-        // A strip will start with 2 vertices where the w is not exactly 0
-        for (int i = 0; i < seg1.vertices.size(); i++)
-        {
-            if (!lastStripW && seg1.vertices[i].w > 0)
-                stripCount = 0;
-            stripCount++;
-            lastStripW = seg1.vertices[i].w > 0;
-
-            if (stripCount >= 3 && i >= 2)
-            {
-                QVector3D A = QVector3D(
-                            seg1.vertices[i-1].x - seg1.vertices[i-2].x,
-                            seg1.vertices[i-1].y - seg1.vertices[i-2].y,
-                            seg1.vertices[i-1].z - seg1.vertices[i-2].z);
-                QVector3D B = QVector3D(
-                            seg1.vertices[i].x - seg1.vertices[i-2].x,
-                            seg1.vertices[i].y - seg1.vertices[i-2].y,
-                            seg1.vertices[i].z - seg1.vertices[i-2].z);
-                QVector3D normal = QVector3D((A.y() * B.z()) - (A.z() * B.y()),
-                                             (A.z() * B.x()) - (A.x() * B.z()),
-                                             (A.x() * B.y()) - (A.y() * B.x()));
-
-                // Vertex 1
-                vertices.push_back(seg1.vertices[i-2].x);
-                vertices.push_back(seg1.vertices[i-2].y);
-                vertices.push_back(seg1.vertices[i-2].z);
-
-                vertices.push_back(normal.x());
-                vertices.push_back(normal.y());
-                vertices.push_back(normal.z());
-
-                // Vertex 2
-                vertices.push_back(seg1.vertices[i-1].x);
-                vertices.push_back(seg1.vertices[i-1].y);
-                vertices.push_back(seg1.vertices[i-1].z);
-
-                vertices.push_back(normal.x());
-                vertices.push_back(normal.y());
-                vertices.push_back(normal.z());
-
-                // Vertex 3
-                vertices.push_back(seg1.vertices[i].x);
-                vertices.push_back(seg1.vertices[i].y);
-                vertices.push_back(seg1.vertices[i].z);
-
-                vertices.push_back(normal.x());
-                vertices.push_back(normal.y());
-                vertices.push_back(normal.z());
-            }
-        }
+        vertices.insert(vertices.end(), vertices1.begin(), vertices1.end());
+        vertices.insert(vertices.end(), vertices2.begin(), vertices2.end());
+        vertices.insert(vertices.end(), vertices3.begin(), vertices3.end());
 
         if (seg1Model.vao != 0)
             deleteModel(seg1Model);
         seg1Model = createModel(vertices.data(), vertices.size()*sizeof(float),
-                (vertices.size()/6)+1, MODELTYPE_3F_3F, GL_TRIANGLES);
+                vertices.size()/6, MODELTYPE_3F_3F, GL_TRIANGLES);
 
         pdbMode = true;
     }
