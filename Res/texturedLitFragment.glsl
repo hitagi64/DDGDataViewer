@@ -12,4 +12,8 @@ void main()
     //FragColor = vec4(light, light, light, 1.0f);
     //FragColor = vec4(uv, 1.0f, 1.0f);
     FragColor = texture(texIn, uv);
+    FragColor.a = FragColor.a*2;
+    if (FragColor.a < 0.01){
+        discard;
+    }
 } 
