@@ -93,19 +93,20 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
 
     uint32_t bufferCursor = 0;
 
-    uint8_t someBufferLength1 = buffer.getU8(bufferCursor+1);// Elements
-
-    for (int i = 0; i < someBufferLength1; i++)
+    // First array is a list of textures indexes and references to the
+    //  textures misc numbers.
+    uint8_t texturesLength = buffer.getU8(bufferCursor+1);// Elements
+    for (int i = 0; i < texturesLength; i++)
     {
         DDGU163Value v;
         v.a = buffer.getU16(bufferCursor+2 + (i*6));
         v.b = buffer.getU16(bufferCursor+2 + (i*6) + 2);
         v.c = buffer.getU16(bufferCursor+2 + (i*6) + 4);
-        seg.beginBuf1.push_back(v);
+        seg.textures.push_back(v);
     }
 
     // Move cursor past buffer that was just read.
-    bufferCursor = bufferCursor+2+(someBufferLength1*6);
+    bufferCursor = bufferCursor+2+(texturesLength*6);
 
     // Seems that it wants to 16 align in the file so that is done here
     // The current buffer seems to be 16 aligned in the pdb so it aligns
@@ -195,6 +196,9 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
         // Files seem to 16 align here again
         if (bufferCursor % 16 != 0)
             bufferCursor += 16 - (bufferCursor%16);
+
+        if (verticesCount != 0)
+            seg.vertexSegmentCount++;
     }
 
     return seg;
@@ -218,20 +222,23 @@ std::string DDGPdb::getInfoAsString()
     std::string ret = DDGContent::getInfoAsString();
     ret += "\nBounds Vertices Count: " + std::to_string(boundsVertices.size());
 
-    ret += "\nSegment1 BeginBuf1 Element Count: " + std::to_string(segment1.beginBuf1.size());
-    ret += "\nSegment1 Vertices Count: " + std::to_string(segment1.vertices.size());
-    ret += "\nSegment1 Buf1 Element Count: " + std::to_string(segment1.buf1.size());
-    ret += "\nSegment1 Buf2 Element Count: " + std::to_string(segment1.buf2.size());
+    ret += "\nSegment1 Textures Count: " + std::to_string(segment1.textures.size());
+    ret += "\nSegment1 Vertex Segment Count: " + std::to_string(segment1.vertexSegmentCount);
+    ret += "\nSegment1 Vertices/Buf1/Buf2 Count: " + std::to_string(segment1.vertices.size());
+    ret += "/" + std::to_string(segment1.buf1.size());
+    ret += "/" + std::to_string(segment1.buf2.size());
 
-    ret += "\nSegment2 BeginBuf1 Element Count: " + std::to_string(segment2.beginBuf1.size());
+    ret += "\nSegment2 Textures Count: " + std::to_string(segment2.textures.size());
+    ret += "\nSegment2 Vertex Segment Count: " + std::to_string(segment2.vertexSegmentCount);
     ret += "\nSegment2 Vertices Count: " + std::to_string(segment2.vertices.size());
-    ret += "\nSegment2 Buf1 Element Count: " + std::to_string(segment2.buf1.size());
-    ret += "\nSegment2 Buf2 Element Count: " + std::to_string(segment2.buf2.size());
+    ret += "/" + std::to_string(segment2.buf1.size());
+    ret += "/" + std::to_string(segment2.buf2.size());
 
-    ret += "\nSegment3 BeginBuf1 Element Count: " + std::to_string(segment3.beginBuf1.size());
+    ret += "\nSegment3 Textures Count: " + std::to_string(segment3.textures.size());
+    ret += "\nSegment3 Vertex Segment Count: " + std::to_string(segment3.vertexSegmentCount);
     ret += "\nSegment3 Vertices Count: " + std::to_string(segment3.vertices.size());
-    ret += "\nSegment3 Buf1 Element Count: " + std::to_string(segment3.buf1.size());
-    ret += "\nSegment3 Buf2 Element Count: " + std::to_string(segment3.buf2.size());
+    ret += "/" + std::to_string(segment3.buf1.size());
+    ret += "/" + std::to_string(segment3.buf2.size());
 
     return ret;
 }

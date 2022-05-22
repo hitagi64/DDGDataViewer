@@ -8,6 +8,7 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QGraphicsView>
+#include <algorithm>
 #include "ContentPreviewer.h"
 #include "DDG/DDGPdb.h"
 
@@ -19,6 +20,8 @@ Inspector::Inspector(QWidget *parent)
     setAcceptDrops(true);
 
     ui->ItemView->setColumnWidth(0, 200);
+
+    selected = 0;
 
     //delete ui->preview;
     //ui->previewGroup->layout()->addWidget(new ContentPreviewer());
@@ -122,6 +125,7 @@ void Inspector::renderDatChildren(DDGDat *dat, QTreeWidgetItem *parent)
     {
         QTreeWidgetItem *itm = new ContentTreeItem(childs[i].get());
         itm->setText(0, QString::fromStdString(childs[i]->getType()));
+        itm->setText(1, QString::fromStdString(std::to_string(i)));
 
         DDGDat *cD = dynamic_cast<DDGDat*>(childs[i].get());
         if (cD != nullptr)
@@ -150,6 +154,8 @@ void Inspector::on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWi
     ui->information->setText(QString::fromStdString(txt));
 
     ui->previewer->displayContent(cItem->content);
+
+    selected = cItem->content;
 
     /*DDGTxm *cI = dynamic_cast<DDGTxm*>(cItem->content);
     if (cI != nullptr)
@@ -261,5 +267,94 @@ void Inspector::on_actionPdb_triggered()
 void Inspector::on_ItemView_itemClicked(QTreeWidgetItem *item, int column)
 {
 
+}
+
+
+void Inspector::on_actionTxm_find_duplicate_misc3_triggered()
+{
+    std::vector<uint16_t> miscs;
+    for (std::shared_ptr<DDGContent> &c : dats)
+    {
+        std::vector<uint16_t> miscs2 = misc3InContent(c.get());
+        miscs.insert(miscs.end(), miscs2.begin(), miscs2.end());
+    }
+
+    std::sort(miscs.begin(), miscs.end());
+    unsigned int count = 0;
+    uint16_t p = 0;
+    for (uint16_t v : miscs)
+    {
+        if (p == v)
+            count++;
+        p = v;
+    }
+
+    QMessageBox messageBox;
+    messageBox.information(0,
+                        "Result",
+                        QString::fromStdString("Found a total of " + std::to_string(miscs.size()) + " misc3's.\n" +
+                                               "Found " + std::to_string(count) + " duplicates."));
+}
+
+std::vector<uint16_t> Inspector::misc3InContent(DDGContent *con)
+{
+    std::vector<uint16_t> miscs;
+
+
+    DDGTxm *cI = dynamic_cast<DDGTxm*>(con);
+    if (cI != nullptr)
+    {
+        miscs.push_back(cI->getMisc3());
+    }
+
+    DDGDat *cD = dynamic_cast<DDGDat*>(con);
+    if (cD != nullptr)
+    {
+        for (std::shared_ptr<DDGContent> &c : cD->getObjects())
+        {
+            std::vector<uint16_t> miscs2 = misc3InContent(c.get());
+            miscs.insert(miscs.end(), miscs2.begin(), miscs2.end());
+        }
+    }
+
+    return miscs;
+}
+
+void Inspector::on_actionPdm_get_before_buffer_1_vals_triggered()
+{
+    if (selected == 0)
+        return;
+
+    DDGPdb *cM = dynamic_cast<DDGPdb*>(selected);
+    if (cM != nullptr)
+    {
+        std::vector<DDGU163Value> s1 = cM->getModelSegment1().textures;
+        std::vector<DDGU163Value> s2 = cM->getModelSegment2().textures;
+        std::vector<DDGU163Value> s3 = cM->getModelSegment3().textures;
+
+        std::string s;
+        s += "Segment 1: \n";
+        for (DDGU163Value v : s1)
+        {
+            s += std::to_string(v.a) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
+        }
+
+        s += "Segment 2: \n";
+        for (DDGU163Value v : s2)
+        {
+            s += std::to_string(v.a) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
+        }
+
+        s += "Segment 3: \n";
+        for (DDGU163Value v : s3)
+        {
+            s += std::to_string(v.a) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
+        }
+
+        QMessageBox messageBox;
+        messageBox.information(0,
+                            "Result",
+                            QString::fromStdString(s));
+    }
 }
 

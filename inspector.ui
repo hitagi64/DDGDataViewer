@@ -95,8 +95,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>639</width>
-              <height>196</height>
+              <width>508</width>
+              <height>485</height>
              </rect>
             </property>
             <layout class="QGridLayout" name="gridLayout_3">
@@ -147,7 +147,15 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <addaction name="actionTxm_find_duplicate_misc3"/>
+    <addaction name="actionPdm_get_before_buffer_1_vals"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuDebug"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
@@ -173,6 +181,16 @@
   <action name="actionPdb">
    <property name="text">
     <string>Pdb</string>
+   </property>
+  </action>
+  <action name="actionTxm_find_duplicate_misc3">
+   <property name="text">
+    <string>Txm find duplicate misc3</string>
+   </property>
+  </action>
+  <action name="actionPdm_get_before_buffer_1_vals">
+   <property name="text">
+    <string>Pdm get before buffer 1 vals</string>
    </property>
   </action>
  </widget>

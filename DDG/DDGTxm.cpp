@@ -25,6 +25,9 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
     misc3 = buffer.getU16(0xE);
 
+    // I am not sure but misc1 and misc3 might be texture id's.
+    // This because they are referenced by pdb models.
+
     unsigned int totalClutSize = (clutWidth * clutHeight * getTxmPixelFormatBitCount(clutPixelType))/8;
     unsigned int totalImageSize = (imageWidth * imageHeight * getTxmPixelFormatBitCount(imagePixelType))/8;
 
@@ -87,12 +90,13 @@ bool DDGTxm::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 std::string DDGTxm::getInfoAsString()
 {
     return DDGContent::getInfoAsString()
-             + "\nImage Pixel Format: " + txmPixelFormatAsString(imagePixelType)
-             + "\nImage Width: " + std::to_string(imageWidth)
-             + "\nImage Height: " + std::to_string(imageHeight)
+            + "\nImage Pixel Format: " + txmPixelFormatAsString(imagePixelType)
+            + "\nImage Width: " + std::to_string(imageWidth)
+            + "\nImage Height: " + std::to_string(imageHeight)
             + "\nClut Pixel Format: " + txmPixelFormatAsString(clutPixelType)
             + "\nClut Width: " + std::to_string(clutWidth)
-            + "\nClut Height: " + std::to_string(clutHeight);
+            + "\nClut Height: " + std::to_string(clutHeight)
+            + "\nMiscs: " + std::to_string(misc1) + ", " + std::to_string(misc2) + ", " + std::to_string(misc3);
 }
 
 DDGImage DDGTxm::convertToImage()
@@ -241,4 +245,9 @@ std::string DDGTxm::txmPixelFormatAsString(DDGTxmPixelFormat format)
         }
         return "Unknown";
     }
+}
+
+uint16_t DDGTxm::getMisc3() const
+{
+    return misc3;
 }

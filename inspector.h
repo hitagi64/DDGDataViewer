@@ -33,6 +33,10 @@ private slots:
 
     void on_actionPdb_triggered();
 
+    void on_actionTxm_find_duplicate_misc3_triggered();
+
+    void on_actionPdm_get_before_buffer_1_vals_triggered();
+
 private:
     Ui::Inspector *ui;
 
@@ -43,5 +47,9 @@ private:
 
     std::vector<std::shared_ptr<DDGContent>> dats;
     std::vector<std::string> datNames;
+
+    std::vector<uint16_t> misc3InContent(DDGContent *c);
+
+    DDGContent* selected;
 };
 #endif // INSPECTOR_H

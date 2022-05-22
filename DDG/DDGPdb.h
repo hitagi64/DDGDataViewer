@@ -59,8 +59,9 @@ struct DDGU162Value
 
 struct DDGModelSegment
 {
-    std::vector<DDGU163Value> beginBuf1;
+    std::vector<DDGU163Value> textures;
 
+    unsigned int vertexSegmentCount = 0;
     std::vector<DDGVector4> vertices;
     std::vector<DDGU163Value> buf1;
     std::vector<DDGU162Value> buf2;
