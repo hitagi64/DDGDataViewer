@@ -34,6 +34,7 @@ class ContentPreviewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Co
 public:
     ContentPreviewer(QWidget *parent);
 
+    // Preview specified DDGContent
     void displayContent(DDGContent *c);
 protected:
     void initializeGL() override;
@@ -44,23 +45,27 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     QSize sizeHint() const override;
 private:
+    // Projection
     void recalculateProjection();
-
     QMatrix4x4 projection;
+
+    // Shaders
     QOpenGLShaderProgram *basicShaderProgram;
     QOpenGLShaderProgram *imagePreviewShader;
     QOpenGLShaderProgram *litShader;
     QOpenGLShaderProgram *greenUnlitShader;
 
+    // Modes
     bool image2DMode;
-    bool pdmMode;
+    bool pdbMode;
 
+    // Camera
     float cameraRotH;
     float cameraRotV;
     float distanceFromCamera;
-
     QPoint lastMousePos;
 
+    // Base models
     ModelData triangle;
     ModelData grid;
     ModelData cube;

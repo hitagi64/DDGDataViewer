@@ -14,7 +14,7 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
     timer->start(10);
 
     image2DMode = false;
-    pdmMode = false;
+    pdbMode = false;
 
     cameraRotH = 0;
     cameraRotV = 0;
@@ -30,7 +30,7 @@ void ContentPreviewer::displayContent(DDGContent *c)
     QOpenGLWidget::makeCurrent();
 
     image2DMode = false;
-    pdmMode = false;
+    pdbMode = false;
 
     DDGTxm *cI = dynamic_cast<DDGTxm*>(c);
     if (cI != nullptr)
@@ -68,9 +68,8 @@ void ContentPreviewer::displayContent(DDGContent *c)
                 stripCount = 0;
             stripCount++;
             lastStripW = seg1.vertices[i].w > 0;
-            std::cout << (lastStripW > 0) << " sc:" << stripCount << std::endl;
 
-            if (stripCount >= 3 && i > 2)
+            if (stripCount >= 3 && i >= 2)
             {
                 QVector3D A = QVector3D(
                             seg1.vertices[i-1].x - seg1.vertices[i-2].x,
@@ -116,9 +115,9 @@ void ContentPreviewer::displayContent(DDGContent *c)
         if (seg1Model.vao != 0)
             deleteModel(seg1Model);
         seg1Model = createModel(vertices.data(), vertices.size()*sizeof(float),
-                vertices.size()/6, MODELTYPE_3F_3F, GL_TRIANGLES);
+                (vertices.size()/6)+1, MODELTYPE_3F_3F, GL_TRIANGLES);
 
-        pdmMode = true;
+        pdbMode = true;
     }
 
     recalculateProjection();
@@ -227,7 +226,7 @@ void ContentPreviewer::paintGL()
         QMatrix4x4 mvp;
         mvp = projection * view * model;
 
-        if (pdmMode)
+        if (pdbMode)
         {
             glPointSize(10);
 
