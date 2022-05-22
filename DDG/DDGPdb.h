@@ -57,14 +57,19 @@ struct DDGU162Value
     uint16_t b;
 };
 
+struct DDGVertexSegment
+{
+    uint8_t textureID = 0;
+    std::vector<DDGVector4> vertices;
+    std::vector<DDGU163Value> buf1;
+    std::vector<DDGU162Value> buf2;
+};
+
 struct DDGModelSegment
 {
     std::vector<DDGU163Value> textures;
 
-    unsigned int vertexSegmentCount = 0;
-    std::vector<DDGVector4> vertices;
-    std::vector<DDGU163Value> buf1;
-    std::vector<DDGU162Value> buf2;
+    std::vector<DDGVertexSegment> vertexSegments;
 };
 
 class DDGPdb : public DDGContent
@@ -83,7 +88,7 @@ public:
     DDGModelSegment getModelSegment1();
     DDGModelSegment getModelSegment2();
     DDGModelSegment getModelSegment3();
-    static std::vector<float> convertSegmentToVertexArray(const DDGModelSegment &segment);
+    static std::vector<float> convertSegmentToVertexArray(const DDGVertexSegment &segment);
 private:
     std::vector<DDGVector4> boundsVertices;
 

@@ -8,6 +8,7 @@
 #include <QOpenGLTexture>
 
 #include "DDG/DDGContent.h"
+#include "DDG/DDGPdb.h"
 
 enum ModelDataType
 {
@@ -26,6 +27,12 @@ struct ModelData
 
     unsigned int drawCount = 0;// e.g. amount of triangles or lines.
     GLenum drawType;
+};
+
+struct ModelTextured
+{
+    ModelData data;
+    unsigned int texture = 0;
 };
 
 class ContentPreviewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
@@ -77,7 +84,9 @@ private:
 
     // pdmMode
     ModelData boundsModel;
-    ModelData seg1Model;
+    std::vector<ModelTextured> meshes;
+    //ModelData seg1Model;
+    void loadModelSegment(DDGModelSegment seg);
 
     // Opengl
     QOpenGLShaderProgram *makeShaderProgram(QString vertexPath, QString fragmentPath);

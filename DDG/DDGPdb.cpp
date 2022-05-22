@@ -120,10 +120,16 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
     // Skip the rest of the 16 bytes
     bufferCursor += 16;
 
+    // Check if the buffer didn't suddenly end
+    if (buffer.getSize() < bufferCursor)
+        return seg;
+
+    unsigned int vertexDataStart = bufferCursor;
+
     // For some reason the vertex data is split up every
     //  so often so keep reading it until the end of
     //  vertexDataSize.
-    while (bufferCursor < vertexDataSize)
+    while (bufferCursor-vertexDataStart < vertexDataSize)
     {
         // Every section of vertex data has a 96 byte header.
 
@@ -133,8 +139,15 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
         uint8_t verticesCount = buffer.getU8(bufferCursor + 64);// Vertices
         //vertices2Count = buffer.getU8(currentBufferCursor + 80);
 
+        // This texture id references an item in textures array in
+        //  the DDGModelSegment object
+        uint8_t textureID = buffer.getU8(bufferCursor + 24);
+
         // Move past the header.
         bufferCursor += 96;
+
+        seg.vertexSegments.push_back(DDGVertexSegment());
+        seg.vertexSegments.back().textureID = textureID;
 
         // Read the vertices
         typedef union {
@@ -155,7 +168,7 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
             i2f w;
             w.i = buffer.getU32(bufferCursor + (i*16) + 12);
 
-            seg.vertices.push_back({x.f, y.f, z.f, w.f});
+            seg.vertexSegments.back().vertices.push_back({x.f, y.f, z.f, w.f});
         }
 
         // Move past vertices and skip the 4 bytes of data after it.
@@ -171,7 +184,7 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
 
             v.c = buffer.getU16(bufferCursor + (i*6) + 4);
 
-            seg.buf1.push_back(v);
+            seg.vertexSegments.back().buf1.push_back(v);
         }
 
         // Move past first array of whatever and skip the 4 bytes
@@ -187,7 +200,7 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
 
             v.b = buffer.getU16(bufferCursor + (i*4) + 2);
 
-            seg.buf2.push_back(v);
+            seg.vertexSegments.back().buf2.push_back(v);
         }
 
         // Move past second array of probably uv's.
@@ -196,9 +209,6 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
         // Files seem to 16 align here again
         if (bufferCursor % 16 != 0)
             bufferCursor += 16 - (bufferCursor%16);
-
-        if (verticesCount != 0)
-            seg.vertexSegmentCount++;
     }
 
     return seg;
@@ -223,22 +233,22 @@ std::string DDGPdb::getInfoAsString()
     ret += "\nBounds Vertices Count: " + std::to_string(boundsVertices.size());
 
     ret += "\nSegment1 Textures Count: " + std::to_string(segment1.textures.size());
-    ret += "\nSegment1 Vertex Segment Count: " + std::to_string(segment1.vertexSegmentCount);
-    ret += "\nSegment1 Vertices/Buf1/Buf2 Count: " + std::to_string(segment1.vertices.size());
-    ret += "/" + std::to_string(segment1.buf1.size());
-    ret += "/" + std::to_string(segment1.buf2.size());
+    ret += "\nSegment1 Vertex Segment Count: " + std::to_string(segment1.vertexSegments.size());
+    //ret += "\nSegment1 Vertices/Buf1/Buf2 Count: " + std::to_string(segment1.vertices.size());
+    //ret += "/" + std::to_string(segment1.buf1.size());
+    //ret += "/" + std::to_string(segment1.buf2.size());
 
     ret += "\nSegment2 Textures Count: " + std::to_string(segment2.textures.size());
-    ret += "\nSegment2 Vertex Segment Count: " + std::to_string(segment2.vertexSegmentCount);
-    ret += "\nSegment2 Vertices Count: " + std::to_string(segment2.vertices.size());
-    ret += "/" + std::to_string(segment2.buf1.size());
-    ret += "/" + std::to_string(segment2.buf2.size());
+    ret += "\nSegment2 Vertex Segment Count: " + std::to_string(segment2.vertexSegments.size());
+    //ret += "\nSegment2 Vertices Count: " + std::to_string(segment2.vertices.size());
+    //ret += "/" + std::to_string(segment2.buf1.size());
+    //ret += "/" + std::to_string(segment2.buf2.size());
 
     ret += "\nSegment3 Textures Count: " + std::to_string(segment3.textures.size());
-    ret += "\nSegment3 Vertex Segment Count: " + std::to_string(segment3.vertexSegmentCount);
-    ret += "\nSegment3 Vertices Count: " + std::to_string(segment3.vertices.size());
-    ret += "/" + std::to_string(segment3.buf1.size());
-    ret += "/" + std::to_string(segment3.buf2.size());
+    ret += "\nSegment3 Vertex Segment Count: " + std::to_string(segment3.vertexSegments.size());
+    //ret += "\nSegment3 Vertices Count: " + std::to_string(segment3.vertices.size());
+    //ret += "/" + std::to_string(segment3.buf1.size());
+    //ret += "/" + std::to_string(segment3.buf2.size());
 
     return ret;
 }
@@ -263,7 +273,7 @@ DDGModelSegment DDGPdb::getModelSegment3()
     return segment3;
 }
 
-std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGModelSegment &segment)
+std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &segment)
 {
     // Vertices will be in the format 3f pos, 3f norm
     std::vector<float> vertices;

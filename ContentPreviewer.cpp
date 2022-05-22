@@ -24,6 +24,19 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
     imagePreviewTexture = 0;
 }
 
+void ContentPreviewer::loadModelSegment(DDGModelSegment seg)
+{
+    for (DDGVertexSegment &vseg : seg.vertexSegments)
+    {
+        std::vector<float> vertices = DDGPdb::convertSegmentToVertexArray(vseg);
+
+        ModelTextured m;
+        m.data = createModel(vertices.data(), vertices.size()*sizeof(float),
+                        vertices.size()/6, MODELTYPE_3F_3F, GL_TRIANGLES);
+        meshes.push_back(m);
+    }
+}
+
 void ContentPreviewer::displayContent(DDGContent *c)
 {
     // c may not be used outside this function
@@ -58,19 +71,14 @@ void ContentPreviewer::displayContent(DDGContent *c)
         DDGModelSegment seg2 = cM->getModelSegment2();
         DDGModelSegment seg3 = cM->getModelSegment3();
 
-        std::vector<float> vertices1 = DDGPdb::convertSegmentToVertexArray(seg1);
-        std::vector<float> vertices2 = DDGPdb::convertSegmentToVertexArray(seg2);
-        std::vector<float> vertices3 = DDGPdb::convertSegmentToVertexArray(seg3);
+        for (int i = 0; i < meshes.size(); i++)
+            if (meshes[i].data.vao != 0)
+                deleteModel(meshes[i].data);
+        meshes.clear();
 
-        std::vector<float> vertices;
-        vertices.insert(vertices.end(), vertices1.begin(), vertices1.end());
-        vertices.insert(vertices.end(), vertices2.begin(), vertices2.end());
-        vertices.insert(vertices.end(), vertices3.begin(), vertices3.end());
-
-        if (seg1Model.vao != 0)
-            deleteModel(seg1Model);
-        seg1Model = createModel(vertices.data(), vertices.size()*sizeof(float),
-                vertices.size()/6, MODELTYPE_3F_3F, GL_TRIANGLES);
+        loadModelSegment(seg1);
+        loadModelSegment(seg2);
+        loadModelSegment(seg3);
 
         pdbMode = true;
     }
@@ -191,7 +199,11 @@ void ContentPreviewer::paintGL()
 
             litShader->bind();
             litShader->setUniformValue("mvp", mvp);
-            drawModel(seg1Model);
+            for (int i = 0; i < meshes.size(); i++)
+            {
+                drawModel(meshes[i].data);
+            }
+
         }
         else
         {
