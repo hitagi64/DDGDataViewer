@@ -9,11 +9,13 @@
 
 #include "DDG/DDGContent.h"
 #include "DDG/DDGPdb.h"
+#include "DDG/DDGDat.h"
 
 enum ModelDataType
 {
     MODELTYPE_3F_3F,
     MODELTYPE_3F_2F,
+    MODELTYPE_3F_3F_2F,
     MODELTYPE_4F,
 };
 
@@ -60,6 +62,7 @@ private:
     QOpenGLShaderProgram *basicShaderProgram;
     QOpenGLShaderProgram *imagePreviewShader;
     QOpenGLShaderProgram *litShader;
+    QOpenGLShaderProgram *texturedLitShader;
     QOpenGLShaderProgram *greenUnlitShader;
 
     // Modes
@@ -85,8 +88,11 @@ private:
     // pdmMode
     ModelData boundsModel;
     std::vector<ModelTextured> meshes;
+public:
+    DDGDat *textureLib;
+private:
     //ModelData seg1Model;
-    void loadModelSegment(DDGModelSegment seg);
+    void loadModelSegment(DDGModelSegment &seg);
 
     // Opengl
     QOpenGLShaderProgram *makeShaderProgram(QString vertexPath, QString fragmentPath);

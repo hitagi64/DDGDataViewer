@@ -191,19 +191,21 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
         //  of data after it again.
         bufferCursor += (verticesCount * 6) + 4;
 
-        // Read the second array with 2x u16's.
-        // I think these are uv's but I dont know in what format.
+        // Read the array with UV's.
+        // These are in fixed point format of 16 bit.
         for (int i = 0; i < verticesCount; i++)
         {
-            DDGU162Value v;
-            v.a = buffer.getU16(bufferCursor + (i*4));
+            DDGVector2 v;
+            uint16_t x = buffer.getU16(bufferCursor + (i*4));
+            v.x = ((float)x)/65535.0f;
 
-            v.b = buffer.getU16(bufferCursor + (i*4) + 2);
+            uint16_t y = buffer.getU16(bufferCursor + (i*4) + 2);
+            v.y = ((float)y)/65535.0f;
 
-            seg.vertexSegments.back().buf2.push_back(v);
+            seg.vertexSegments.back().UVs.push_back(v);
         }
 
-        // Move past second array of probably uv's.
+        // Move past second array of uv's.
         bufferCursor += (verticesCount * 4);
 
         // Files seem to 16 align here again
@@ -278,6 +280,10 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
     // Vertices will be in the format 3f pos, 3f norm
     std::vector<float> vertices;
 
+    // There need to be the same amount of vertices and uv's.
+    if (segment.vertices.size() != segment.UVs.size())
+        return vertices;
+
     bool lastStripW = false;
     unsigned int stripCount = 0;// Triangles since strip begin
     // A strip will start with 2 vertices where the w is not exactly 0
@@ -311,6 +317,9 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
             vertices.push_back(normal.y);
             vertices.push_back(normal.z);
 
+            vertices.push_back(segment.UVs[i-2].x);
+            vertices.push_back(segment.UVs[i-2].y);
+
             // Vertex 2
             vertices.push_back(segment.vertices[i-1].x);
             vertices.push_back(segment.vertices[i-1].y);
@@ -320,6 +329,9 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
             vertices.push_back(normal.y);
             vertices.push_back(normal.z);
 
+            vertices.push_back(segment.UVs[i-1].x);
+            vertices.push_back(segment.UVs[i-1].y);
+
             // Vertex 3
             vertices.push_back(segment.vertices[i].x);
             vertices.push_back(segment.vertices[i].y);
@@ -328,6 +340,9 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
             vertices.push_back(normal.x);
             vertices.push_back(normal.y);
             vertices.push_back(normal.z);
+
+            vertices.push_back(segment.UVs[i].x);
+            vertices.push_back(segment.UVs[i].y);
         }
     }
     return vertices;

@@ -153,6 +153,7 @@
     </property>
     <addaction name="actionTxm_find_duplicate_misc3"/>
     <addaction name="actionPdm_get_before_buffer_1_vals"/>
+    <addaction name="actionSet_DAT_as_active_texture_lib"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDebug"/>
@@ -191,6 +192,11 @@
   <action name="actionPdm_get_before_buffer_1_vals">
    <property name="text">
     <string>Pdm get before buffer 1 vals</string>
+   </property>
+  </action>
+  <action name="actionSet_DAT_as_active_texture_lib">
+   <property name="text">
+    <string>Set DAT as active texture lib</string>
    </property>
   </action>
  </widget>

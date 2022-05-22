@@ -358,3 +358,13 @@ void Inspector::on_actionPdm_get_before_buffer_1_vals_triggered()
     }
 }
 
+
+void Inspector::on_actionSet_DAT_as_active_texture_lib_triggered()
+{
+    DDGDat *cD = dynamic_cast<DDGDat*>(selected);
+    if (cD != nullptr)
+    {
+        ui->previewer->textureLib = cD;
+    }
+}
+

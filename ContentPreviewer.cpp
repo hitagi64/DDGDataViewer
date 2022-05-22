@@ -22,9 +22,11 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
     distanceFromCamera = 10;
 
     imagePreviewTexture = 0;
+
+    textureLib = 0;
 }
 
-void ContentPreviewer::loadModelSegment(DDGModelSegment seg)
+void ContentPreviewer::loadModelSegment(DDGModelSegment &seg)
 {
     for (DDGVertexSegment &vseg : seg.vertexSegments)
     {
@@ -32,7 +34,23 @@ void ContentPreviewer::loadModelSegment(DDGModelSegment seg)
 
         ModelTextured m;
         m.data = createModel(vertices.data(), vertices.size()*sizeof(float),
-                        vertices.size()/6, MODELTYPE_3F_3F, GL_TRIANGLES);
+                        vertices.size()/6, MODELTYPE_3F_3F_2F, GL_TRIANGLES);
+
+        if (vseg.textureID < seg.textures.size() && textureLib)
+        {
+            unsigned int textureIdInDat = seg.textures[vseg.textureID].a;
+            if (textureIdInDat < textureLib->getObjects().size())
+            {
+                DDGTxm *cI = dynamic_cast<DDGTxm*>(textureLib->getObjects()[textureIdInDat].get());
+                if (cI != nullptr)
+                {
+                    DDGImage img = cI->convertToImage();
+
+                    m.texture = makeTexture(img.data.get(), img.width, img.height, GL_RGBA);
+                }
+            }
+        }
+
         meshes.push_back(m);
     }
 }
@@ -124,6 +142,9 @@ void ContentPreviewer::initializeGL()
     litShader = makeShaderProgram("Res/whiteLitVertex.glsl", "Res/whiteLitFragment.glsl");
     litShader->link();
 
+    texturedLitShader = makeShaderProgram("Res/texturedLitVertex.glsl", "Res/texturedLitFragment.glsl");
+    texturedLitShader->link();
+
     greenUnlitShader = makeShaderProgram("Res/greenUnlitVertex.glsl", "Res/greenUnlitFragment.glsl");
     greenUnlitShader->link();
 
@@ -197,13 +218,14 @@ void ContentPreviewer::paintGL()
             greenUnlitShader->setUniformValue("mvp", mvp);
             drawModel(boundsModel);
 
-            litShader->bind();
-            litShader->setUniformValue("mvp", mvp);
+            texturedLitShader->bind();
+            texturedLitShader->setUniformValue("mvp", mvp);
             for (int i = 0; i < meshes.size(); i++)
             {
+                if (meshes[i].texture != 0)
+                    useTexture(meshes[i].texture);
                 drawModel(meshes[i].data);
             }
-
         }
         else
         {
@@ -429,6 +451,17 @@ ModelData ContentPreviewer::createModel(void *data, unsigned int dataSize,
 
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
         glEnableVertexAttribArray(1);
+    }
+    else if (type == MODELTYPE_3F_3F_2F)
+    {
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
+        glEnableVertexAttribArray(2);
     }
     else if (type == MODELTYPE_4F)
     {

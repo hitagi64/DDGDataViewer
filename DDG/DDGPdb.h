@@ -44,6 +44,22 @@ struct DDGVector3
     float z;
 };
 
+struct DDGVector2
+{
+    DDGVector2()
+    {
+        x = 0;
+        y = 0;
+    }
+    DDGVector2(float x, float y)
+    {
+        this->x = x;
+        this->y = y;
+    }
+    float x;
+    float y;
+};
+
 struct DDGU163Value
 {
     uint16_t a;
@@ -51,18 +67,12 @@ struct DDGU163Value
     uint16_t c;
 };
 
-struct DDGU162Value
-{
-    uint16_t a;
-    uint16_t b;
-};
-
 struct DDGVertexSegment
 {
     uint8_t textureID = 0;
     std::vector<DDGVector4> vertices;
     std::vector<DDGU163Value> buf1;
-    std::vector<DDGU162Value> buf2;
+    std::vector<DDGVector2> UVs;
 };
 
 struct DDGModelSegment
