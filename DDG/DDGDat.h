@@ -26,6 +26,7 @@ public:
 private:
     uint32_t objectCount;
     std::vector<std::shared_ptr<DDGContent>> objects;
+    bool containsMapData;
 };
 
 #endif // DDGDAT_H
