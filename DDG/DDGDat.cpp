@@ -25,16 +25,27 @@ void DDGDat::saveToFile(std::string filename)
 
 void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
-    if (buffer.getU8(0) != 'D' ||
-        buffer.getU8(1) != 'A' ||
-        buffer.getU8(2) != 'T' ||
-        buffer.getU8(3) != '\0')
+    uint32_t baseDatOffset = 0;
+
+    if (buffer.getU8(0) == 'D' &&
+        buffer.getU8(1) == 'A' &&
+        buffer.getU8(2) == 'T' &&
+        buffer.getU8(3) == '\0')
+        baseDatOffset = 0;
+    else if (buffer.getU8(4) == 'D' &&
+             buffer.getU8(5) == 'A' &&
+             buffer.getU8(6) == 'T' &&
+             buffer.getU8(7) == '\0')
+        baseDatOffset = 4;
+    else
         throw std::string("Dat file header magic sequence not found.");
-    objectCount = buffer.getU32(4);
+    objectCount = buffer.getU32(baseDatOffset + 4);
     for (int i = 0; i < objectCount; i++)
     {
-        uint32_t offset = buffer.getU32(8 + (i*8));
-        uint32_t size = buffer.getU32(8 + (i*8) + 4);
+        uint32_t offset = buffer.getU32(baseDatOffset + 8 + (i*8)) + baseDatOffset;
+        uint32_t size = buffer.getU32(baseDatOffset + 8 + (i*8) + 4);
+        if (size == 0)
+            continue;
         DDGMemoryBuffer subBuf = buffer.getPortion(offset, offset+size);
 
         bool match;
@@ -51,12 +62,17 @@ DDGMemoryBuffer DDGDat::saveAsMemoryBuffer()
 
 bool DDGDat::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 {
-    if (buffer.getU8(0) != 'D' ||
-        buffer.getU8(1) != 'A' ||
-        buffer.getU8(2) != 'T' ||
-        buffer.getU8(3) != '\0')
-        return false;
-    return true;
+    if (buffer.getU8(0) == 'D' &&
+        buffer.getU8(1) == 'A' &&
+        buffer.getU8(2) == 'T' &&
+        buffer.getU8(3) == '\0')
+        return true;
+    if (buffer.getU8(4) == 'D' &&
+        buffer.getU8(5) == 'A' &&
+        buffer.getU8(6) == 'T' &&
+        buffer.getU8(7) == '\0')
+        return true;
+    return false;
 }
 
 std::string DDGDat::getInfoAsString()
