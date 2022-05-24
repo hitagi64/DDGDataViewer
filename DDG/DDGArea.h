@@ -13,6 +13,11 @@ public:
     DDGMemoryBuffer saveAsMemoryBuffer();
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
     std::string getInfoAsString();
+
+    std::vector<float> getPoints();
+
+private:
+    std::vector<float> points;
 };
 
 #endif // DDGAREA_H

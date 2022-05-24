@@ -6,15 +6,19 @@
 
 #include "DDG/DDGTxm.h"
 #include "DDG/DDGPdb.h"
+#include "DDG/DDGArea.h"
 
 ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {
+    setFocusPolicy(Qt::FocusPolicy::ClickFocus);
+
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, QOverload<>::of(&ContentPreviewer::update));
     timer->start(10);
 
     image2DMode = false;
     pdbMode = false;
+    areaMode = false;
 
     cameraRotH = 0;
     cameraRotV = 0;
@@ -24,6 +28,12 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
     imagePreviewTexture = 0;
 
     textureLib = 0;
+
+    fastMode = 0;
+    flyMode = 0;
+
+    direction = QVector3D(0, 0, 0);
+    position = QVector3D(0, 0, 0);
 }
 
 void ContentPreviewer::loadModelSegment(DDGModelSegment &seg)
@@ -62,6 +72,7 @@ void ContentPreviewer::displayContent(DDGContent *c)
 
     image2DMode = false;
     pdbMode = false;
+    areaMode = false;
 
     DDGTxm *cI = dynamic_cast<DDGTxm*>(c);
     if (cI != nullptr)
@@ -99,6 +110,16 @@ void ContentPreviewer::displayContent(DDGContent *c)
         loadModelSegment(seg3);
 
         pdbMode = true;
+    }
+    DDGArea *cA = dynamic_cast<DDGArea*>(c);
+    if (cA != nullptr)
+    {
+        std::vector<float> points = cA->getPoints();
+
+        areaPointsModel = createModel(points.data(), points.size()*sizeof(float), points.size(), MODELTYPE_3F, GL_POINTS);
+        areaLinesModel = createModel(points.data(), points.size()*sizeof(float), points.size(), MODELTYPE_3F, GL_LINES);
+
+        areaMode = true;
     }
 
     recalculateProjection();
@@ -200,11 +221,26 @@ void ContentPreviewer::paintGL()
     }
     else
     {
-        view.lookAt(QVector3D(
-                        sin(cameraRotH * (3.1415f/180))*-distanceFromCamera*cos(cameraRotV * (3.1415f/180)),
-                        sin(cameraRotV * (3.1415f/180))*-distanceFromCamera,
-                        cos(cameraRotH * (3.1415f/180))*-distanceFromCamera*cos(cameraRotV * (3.1415f/180))
-                        ), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
+        position += QVector3D(
+                    (sin(cameraRotH * (3.1415f/180))*direction.z()*cos(cameraRotV * (3.1415f/180)))
+                        +(cos(cameraRotH * (3.1415f/180))*-direction.x()),
+                    sin(cameraRotV * (3.1415f/180))*direction.z(),
+                    (cos(cameraRotH * (3.1415f/180))*direction.z()*cos(cameraRotV * (3.1415f/180)))
+                        +(sin(cameraRotH * (3.1415f/180))*direction.x())
+                    )/(0.1f+((fastMode==0)*10));
+
+        if (flyMode)
+            view.lookAt(position, position + QVector3D(
+                            sin(cameraRotH * (3.1415f/180))*cos(cameraRotV * (3.1415f/180)),
+                            sin(cameraRotV * (3.1415f/180)),
+                            cos(cameraRotH * (3.1415f/180))*cos(cameraRotV * (3.1415f/180))
+                            ), QVector3D(0, 1, 0));
+        else
+            view.lookAt(QVector3D(
+                            sin(cameraRotH * (3.1415f/180))*-distanceFromCamera*cos(cameraRotV * (3.1415f/180)),
+                            sin(cameraRotV * (3.1415f/180))*-distanceFromCamera,
+                            cos(cameraRotH * (3.1415f/180))*-distanceFromCamera*cos(cameraRotV * (3.1415f/180))
+                            ), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
 
         QMatrix4x4 model;
         model.translate(0, 0, 0);
@@ -229,6 +265,15 @@ void ContentPreviewer::paintGL()
                     useTexture(meshes[i].texture);
                 drawModel(meshes[i].data);
             }
+        }
+        else if (areaMode)
+        {
+            glPointSize(10);
+
+            greenUnlitShader->bind();
+            greenUnlitShader->setUniformValue("mvp", mvp);
+            drawModel(areaPointsModel);
+            drawModel(areaLinesModel);
         }
         else
         {
@@ -276,9 +321,14 @@ void ContentPreviewer::mouseMoveEvent(QMouseEvent *event)
 
 void ContentPreviewer::wheelEvent(QWheelEvent *event)
 {
+    if (flyMode)
+        return;
     if (image2DMode)
         return;
-    distanceFromCamera += event->angleDelta().y()/-30.0f;
+    if (fastMode)
+        distanceFromCamera += (event->angleDelta().y()/-3.0f);
+    else
+        distanceFromCamera += (event->angleDelta().y()/-30.0f);
     if (distanceFromCamera < 0.2)
         distanceFromCamera = 0.2;
 }
@@ -286,6 +336,40 @@ void ContentPreviewer::wheelEvent(QWheelEvent *event)
 QSize ContentPreviewer::sizeHint() const
 {
     return {300, 300};
+}
+
+void ContentPreviewer::keyPressEvent(QKeyEvent *e)
+{
+    if (e->isAutoRepeat())
+        return;
+
+    if (e->key() == Qt::Key_W)
+        direction.setZ(1);
+    if (e->key() == Qt::Key_S)
+        direction.setZ(-1);
+    if (e->key() == Qt::Key_A)
+        direction.setX(-1);
+    if (e->key() == Qt::Key_D)
+        direction.setX(1);
+    if (e->key() == Qt::Key_Shift)
+        fastMode = true;
+}
+
+void ContentPreviewer::keyReleaseEvent(QKeyEvent *e)
+{
+    if (e->isAutoRepeat())
+        return;
+
+    if (e->key() == Qt::Key_W)
+        direction.setZ(0);
+    if (e->key() == Qt::Key_S)
+        direction.setZ(0);
+    if (e->key() == Qt::Key_A)
+        direction.setX(0);
+    if (e->key() == Qt::Key_D)
+        direction.setX(0);
+    if (e->key() == Qt::Key_Shift)
+        fastMode = false;
 }
 
 void ContentPreviewer::recalculateProjection()
@@ -469,6 +553,11 @@ ModelData ContentPreviewer::createModel(void *data, unsigned int dataSize,
     else if (type == MODELTYPE_4F)
     {
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+    }
+    else if (type == MODELTYPE_3F)
+    {
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
         glEnableVertexAttribArray(0);
     }
     else

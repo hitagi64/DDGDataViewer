@@ -22,9 +22,6 @@ Inspector::Inspector(QWidget *parent)
     ui->ItemView->setColumnWidth(0, 200);
 
     selected = 0;
-
-    //delete ui->preview;
-    //ui->previewGroup->layout()->addWidget(new ContentPreviewer());
 }
 
 Inspector::~Inspector()
@@ -156,31 +153,6 @@ void Inspector::on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWi
     ui->previewer->displayContent(cItem->content);
 
     selected = cItem->content;
-
-    /*DDGTxm *cI = dynamic_cast<DDGTxm*>(cItem->content);
-    if (cI != nullptr)
-    {
-        DDGImage ddgImage;
-        try {
-            ddgImage = cI->convertToImage();
-        }  catch (std::string e) {
-            QMessageBox messageBox;
-            messageBox.critical(0,"Error","An error occured while previewing DDGImage: " + QString::fromStdString(e));
-        }
-
-        QImage img(ddgImage.width, ddgImage.height, QImage::Format_RGBX8888);
-        memcpy(img.bits(), ddgImage.data.get(), ddgImage.width * ddgImage.height * 4);
-
-        ui->previewer->displayContent(cItem->content);
-
-        QGraphicsView *view = ui->preview;
-        QGraphicsScene* scene = new QGraphicsScene();
-        view->setScene(scene);
-        QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(img));
-        scene->addItem(item);
-        view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
-        view->show();
-    }*/
 }
 
 void Inspector::on_actionDat_triggered()
@@ -310,5 +282,10 @@ void Inspector::on_actionSet_DAT_as_active_texture_lib_triggered()
     {
         ui->previewer->textureLib = cD;
     }
+}
+
+void Inspector::on_actionFly_Mode_triggered()
+{
+    ui->previewer->flyMode = ui->actionFly_Mode->isChecked();
 }
 

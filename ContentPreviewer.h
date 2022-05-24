@@ -17,6 +17,7 @@ enum ModelDataType
     MODELTYPE_3F_2F,
     MODELTYPE_3F_3F_2F,
     MODELTYPE_4F,
+    MODELTYPE_3F,
 };
 
 struct ModelData
@@ -53,6 +54,8 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     QSize sizeHint() const override;
+    void keyPressEvent(QKeyEvent *e) override;
+    void keyReleaseEvent(QKeyEvent *e) override;
 private:
     // Projection
     void recalculateProjection();
@@ -68,13 +71,20 @@ private:
     // Modes
     bool image2DMode;
     bool pdbMode;
+    bool areaMode;
 
     // Camera
     float cameraRotH;
     float cameraRotV;
     float distanceFromCamera;
     QPoint lastMousePos;
+    QVector3D direction;
+    QVector3D position;
+public:
+    bool fastMode;
+    bool flyMode;
 
+private:
     // Base models
     ModelData triangle;
     ModelData grid;
@@ -88,6 +98,10 @@ private:
     // pdmMode
     ModelData boundsModel;
     std::vector<ModelTextured> meshes;
+
+    // Area mode
+    ModelData areaPointsModel;
+    ModelData areaLinesModel;
 public:
     DDGDat *textureLib;
 private:
