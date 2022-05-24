@@ -1,6 +1,7 @@
 #include "DDGDat.h"
 #include "DDGTxm.h"
 #include "DDGPdb.h"
+#include "DDGArea.h"
 
 DDGDat::DDGDat()
 {
@@ -54,6 +55,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
     }
     else
         throw std::string("Dat file header magic sequence not found.");
+
     objectCount = buffer.getU32(baseDatOffset + 4);
     for (int i = 0; i < objectCount; i++)
     {
@@ -63,9 +65,18 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
             continue;
         DDGMemoryBuffer subBuf = buffer.getPortion(offset, offset+size);
 
-        bool match;
-        std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
-        objects.push_back(obj);
+        if (containsMapData && i == 0)
+        {
+            std::shared_ptr<DDGContent> obj = std::make_shared<DDGArea>();
+            obj->loadFromMemoryBuffer(subBuf);
+            objects.push_back(obj);
+        }
+        else
+        {
+            bool match;
+            std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
+            objects.push_back(obj);
+        }
     }
 }
 

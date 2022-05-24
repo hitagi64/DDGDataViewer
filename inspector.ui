@@ -151,7 +151,6 @@
     <property name="title">
      <string>Debug</string>
     </property>
-    <addaction name="actionTxm_find_duplicate_misc3"/>
     <addaction name="actionPdm_get_before_buffer_1_vals"/>
     <addaction name="actionSet_DAT_as_active_texture_lib"/>
    </widget>
@@ -182,11 +181,6 @@
   <action name="actionPdb">
    <property name="text">
     <string>Pdb</string>
-   </property>
-  </action>
-  <action name="actionTxm_find_duplicate_misc3">
-   <property name="text">
-    <string>Txm find duplicate misc3</string>
    </property>
   </action>
   <action name="actionPdm_get_before_buffer_1_vals">

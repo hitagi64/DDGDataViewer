@@ -264,62 +264,6 @@ void Inspector::on_actionPdb_triggered()
     renderDat();
 }
 
-void Inspector::on_ItemView_itemClicked(QTreeWidgetItem *item, int column)
-{
-
-}
-
-
-void Inspector::on_actionTxm_find_duplicate_misc3_triggered()
-{
-    std::vector<uint16_t> miscs;
-    for (std::shared_ptr<DDGContent> &c : dats)
-    {
-        std::vector<uint16_t> miscs2 = misc3InContent(c.get());
-        miscs.insert(miscs.end(), miscs2.begin(), miscs2.end());
-    }
-
-    std::sort(miscs.begin(), miscs.end());
-    unsigned int count = 0;
-    uint16_t p = 0;
-    for (uint16_t v : miscs)
-    {
-        if (p == v)
-            count++;
-        p = v;
-    }
-
-    QMessageBox messageBox;
-    messageBox.information(0,
-                        "Result",
-                        QString::fromStdString("Found a total of " + std::to_string(miscs.size()) + " misc3's.\n" +
-                                               "Found " + std::to_string(count) + " duplicates."));
-}
-
-std::vector<uint16_t> Inspector::misc3InContent(DDGContent *con)
-{
-    std::vector<uint16_t> miscs;
-
-
-    DDGTxm *cI = dynamic_cast<DDGTxm*>(con);
-    if (cI != nullptr)
-    {
-        miscs.push_back(cI->getMisc3());
-    }
-
-    DDGDat *cD = dynamic_cast<DDGDat*>(con);
-    if (cD != nullptr)
-    {
-        for (std::shared_ptr<DDGContent> &c : cD->getObjects())
-        {
-            std::vector<uint16_t> miscs2 = misc3InContent(c.get());
-            miscs.insert(miscs.end(), miscs2.begin(), miscs2.end());
-        }
-    }
-
-    return miscs;
-}
-
 void Inspector::on_actionPdm_get_before_buffer_1_vals_triggered()
 {
     if (selected == 0)

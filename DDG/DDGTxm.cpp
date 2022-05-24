@@ -239,15 +239,6 @@ std::string DDGTxm::txmPixelFormatAsString(DDGTxmPixelFormat format)
     case PSMZ16S:
         return "PSMZ16S";
     default:
-        for (int i = 0; i < 2; i++)
-        {
-
-        }
         return "Unknown";
     }
-}
-
-uint16_t DDGTxm::getMisc3() const
-{
-    return misc3;
 }

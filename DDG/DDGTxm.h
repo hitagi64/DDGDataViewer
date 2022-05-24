@@ -41,7 +41,6 @@ public:
     std::string getInfoAsString();
 
     DDGImage convertToImage();
-    uint16_t getMisc3() const;
 private:
     static uint8_t getTxmPixelFormatBitCount(DDGTxmPixelFormat p);
     static std::string txmPixelFormatAsString(DDGTxmPixelFormat format);

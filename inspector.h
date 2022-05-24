@@ -23,20 +23,11 @@ public:
 private slots:
     void on_actionExit_triggered();
     void on_actionOpen_triggered();
-    void on_ItemView_itemClicked(QTreeWidgetItem *item, int column);
-
     void on_actionDat_triggered();
-
     void on_actionTxm_triggered();
-
     void on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
-
     void on_actionPdb_triggered();
-
-    void on_actionTxm_find_duplicate_misc3_triggered();
-
     void on_actionPdm_get_before_buffer_1_vals_triggered();
-
     void on_actionSet_DAT_as_active_texture_lib_triggered();
 
 private:
