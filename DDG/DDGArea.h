@@ -2,6 +2,16 @@
 #define DDGAREA_H
 
 #include "DDGContent.h"
+#include "DDGCommon.h"
+
+struct DDGTrackPiece
+{
+    DDGVector3 p1;
+    DDGVector3 p2;
+
+    int misc1;
+    int misc2;
+};
 
 class DDGArea : public DDGContent
 {
