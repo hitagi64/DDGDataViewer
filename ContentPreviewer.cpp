@@ -116,8 +116,8 @@ void ContentPreviewer::displayContent(DDGContent *c)
     {
         std::vector<float> points = cA->getPoints();
 
-        areaPointsModel = createModel(points.data(), points.size()*sizeof(float), points.size(), MODELTYPE_3F, GL_POINTS);
-        areaLinesModel = createModel(points.data(), points.size()*sizeof(float), points.size(), MODELTYPE_3F, GL_LINES);
+        areaPointsModel = createModel(points.data(), points.size()*sizeof(float), points.size()/6, MODELTYPE_3F_3F, GL_POINTS);
+        areaLinesModel = createModel(points.data(), points.size()*sizeof(float), points.size()/6, MODELTYPE_3F_3F, GL_LINES);
 
         areaMode = true;
     }
@@ -270,8 +270,8 @@ void ContentPreviewer::paintGL()
         {
             glPointSize(10);
 
-            greenUnlitShader->bind();
-            greenUnlitShader->setUniformValue("mvp", mvp);
+            basicShaderProgram->bind();
+            basicShaderProgram->setUniformValue("mvp", mvp);
             drawModel(areaPointsModel);
             drawModel(areaLinesModel);
         }

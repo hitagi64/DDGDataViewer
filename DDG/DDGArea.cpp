@@ -39,14 +39,21 @@ void DDGArea::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         i2f z2;
         z2.i = buffer.getU32(bufferCursor + 20);
 
-        points.push_back(x.f);
-        points.push_back(y.f);
-        points.push_back(z.f);
-        points.push_back(x2.f);
-        points.push_back(y2.f);
-        points.push_back(z2.f);
+        DDGTrackPiece track;
+        track.p1 = DDGVector3(x.f, y.f, z.f);
+        track.p2 = DDGVector3(x2.f, y2.f, z2.f);
+
+        track.nextSpline = buffer.getU32(bufferCursor + 24);
+        track.previousSpline = buffer.getU32(bufferCursor + 32);
+
+        track.startDistance = buffer.getU32(bufferCursor + 40);
+        track.endDistance = buffer.getU32(bufferCursor + 44);
+
+        track.misc1 = buffer.getU32(bufferCursor + 52);
+        track.misc2 = buffer.getU32(bufferCursor + 56);
 
         bufferCursor += 76;
+        tracks.push_back(track);
     }
 }
 
@@ -64,10 +71,45 @@ bool DDGArea::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 std::string DDGArea::getInfoAsString()
 {
     return DDGContent::getInfoAsString()
-            + "\nPoints: " + std::to_string(points.size());
+            + "\nTracks: " + std::to_string(tracks.size());
 }
 
 std::vector<float> DDGArea::getPoints()
 {
+    std::vector<float> points;
+    for (DDGTrackPiece &track : tracks)
+    {
+        points.push_back(track.p1.x);
+        points.push_back(track.p1.y);
+        points.push_back(track.p1.z);
+        if (track.misc1 == -1)
+        {
+            points.push_back(0);
+            points.push_back(1.0f);
+            points.push_back(0);
+        }
+        else
+        {
+            points.push_back(1);
+            points.push_back(0);
+            points.push_back(1);
+        }
+
+        points.push_back(track.p2.x);
+        points.push_back(track.p2.y);
+        points.push_back(track.p2.z);
+        if (track.misc2 == -1)
+        {
+            points.push_back(0);
+            points.push_back(1.0f);
+            points.push_back(0);
+        }
+        else
+        {
+            points.push_back(1);
+            points.push_back(0);
+            points.push_back(1);
+        }
+    }
     return points;
 }
