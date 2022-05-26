@@ -12,18 +12,44 @@ std::string DDGTxm::getType()
 
 void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
-    misc1 = buffer.getU16(0x6);
-    imagePixelType = (DDGTxmPixelFormat)buffer.getU8(0x0);
-    imageWidth = buffer.getU16(0x2);
-    imageHeight = buffer.getU16(0x4);
+    int headerSize = 16;
 
-    misc2 = buffer.getU8(0x9);
 
-    clutPixelType = (DDGTxmPixelFormat)buffer.getU8(0x8);
-    clutWidth = buffer.getU16(0x0A);
-    clutHeight = buffer.getU16(0x0C);
+    if (buffer.getU8(0) == 'T' &&
+        buffer.getU8(1) == 'X' &&
+        buffer.getU8(2) == 'D')
+    {
+        // Not present in DDG Shinkansen it seems.
+        misc1 = 0;
+        misc2 = 0;
+        misc3 = 0;
 
-    misc3 = buffer.getU16(0xE);
+        clutWidth = buffer.getU8(3);
+        clutHeight = buffer.getU8(4);
+        clutPixelType = (DDGTxmPixelFormat)buffer.getU8(5);
+
+        imagePixelType = (DDGTxmPixelFormat)0x13;
+        imageWidth = buffer.getU16(6);
+        imageHeight = buffer.getU16(8);
+
+        // Images in DDG Shinkansen have 20 byte header.
+        headerSize = 20;
+    }
+    else
+    {
+        misc1 = buffer.getU16(0x6);
+        imagePixelType = (DDGTxmPixelFormat)buffer.getU8(0x0);
+        imageWidth = buffer.getU16(0x2);
+        imageHeight = buffer.getU16(0x4);
+
+        misc2 = buffer.getU8(0x9);
+
+        clutPixelType = (DDGTxmPixelFormat)buffer.getU8(0x8);
+        clutWidth = buffer.getU16(0x0A);
+        clutHeight = buffer.getU16(0x0C);
+
+        misc3 = buffer.getU16(0xE);
+    }
 
     // I am not sure but misc1 and misc3 might be texture id's.
     // This because they are referenced by pdb models.
@@ -35,13 +61,13 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
     clutData = DDGMemoryBuffer(totalClutSize);
     for (int i = 0; i < totalClutSize; i++)
     {
-        clutData.setU8(buffer.getU8(16 + i), i);
+        clutData.setU8(buffer.getU8(headerSize + i), i);
     }
 
     imageData = DDGMemoryBuffer(totalImageSize);
     for (int i = 0; i < totalImageSize; i++)
     {
-        imageData.setU8(buffer.getU8(16 + totalClutSize + i), i);
+        imageData.setU8(buffer.getU8(headerSize + totalClutSize + i), i);
     }
 }
 
@@ -53,6 +79,13 @@ DDGMemoryBuffer DDGTxm::saveAsMemoryBuffer()
 
 bool DDGTxm::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 {
+    // DDG Shinkansen has textures prefixed with TXD and uses a different
+    //  format than Final and Professional 2
+    if (buffer.getU8(0) == 'T' &&
+        buffer.getU8(1) == 'X' &&
+        buffer.getU8(2) == 'D')
+        return true;
+
     // Seems the first 2 bytes are often the same but not always
     //if (buffer.getU8(0) != buffer.getU8(0x1))
     //    return false;
