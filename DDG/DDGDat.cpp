@@ -1,7 +1,7 @@
 #include "DDGDat.h"
 #include "DDGTxm.h"
 #include "DDGPdb.h"
-#include "DDGArea.h"
+#include "DDGTrack.h"
 
 DDGDat::DDGDat()
 {
@@ -67,7 +67,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
         if (containsMapData && i == 0)
         {
-            std::shared_ptr<DDGContent> obj = std::make_shared<DDGArea>();
+            std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrack>();
             obj->loadFromMemoryBuffer(subBuf);
             objects.push_back(obj);
         }

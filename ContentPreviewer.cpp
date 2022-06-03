@@ -6,7 +6,7 @@
 
 #include "DDG/DDGTxm.h"
 #include "DDG/DDGPdb.h"
-#include "DDG/DDGArea.h"
+#include "DDG/DDGTrack.h"
 
 ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -111,7 +111,7 @@ void ContentPreviewer::displayContent(DDGContent *c)
 
         pdbMode = true;
     }
-    DDGArea *cA = dynamic_cast<DDGArea*>(c);
+    DDGTrack *cA = dynamic_cast<DDGTrack*>(c);
     if (cA != nullptr)
     {
         std::vector<float> points = cA->getPoints();

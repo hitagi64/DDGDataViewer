@@ -1,16 +1,16 @@
-#include "DDGArea.h"
+#include "DDGTrack.h"
 
-DDGArea::DDGArea()
+DDGTrack::DDGTrack()
 {
 
 }
 
-std::string DDGArea::getType()
+std::string DDGTrack::getType()
 {
     return "AREA";
 }
 
-void DDGArea::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
+void DDGTrack::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
     unsigned int bufferCursor = 0;
 
@@ -57,24 +57,24 @@ void DDGArea::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
     }
 }
 
-DDGMemoryBuffer DDGArea::saveAsMemoryBuffer()
+DDGMemoryBuffer DDGTrack::saveAsMemoryBuffer()
 {
     throw std::string("Saving DDGArea to Memory Buffer not yet possible.");
     return DDGMemoryBuffer(0);
 }
 
-bool DDGArea::possibleMatchForBuffer(DDGMemoryBuffer buffer)
+bool DDGTrack::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 {
     return false;
 }
 
-std::string DDGArea::getInfoAsString()
+std::string DDGTrack::getInfoAsString()
 {
     return DDGContent::getInfoAsString()
             + "\nTracks: " + std::to_string(tracks.size());
 }
 
-std::vector<float> DDGArea::getPoints()
+std::vector<float> DDGTrack::getPoints()
 {
     std::vector<float> points;
     for (DDGTrackPiece &track : tracks)

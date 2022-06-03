@@ -1,5 +1,5 @@
-#ifndef DDGAREA_H
-#define DDGAREA_H
+#ifndef DDGTRACK_H
+#define DDGTRACK_H
 
 #include "DDGContent.h"
 #include "DDGCommon.h"
@@ -19,10 +19,10 @@ struct DDGTrackPiece
     int misc2;
 };
 
-class DDGArea : public DDGContent
+class DDGTrack : public DDGContent
 {
 public:
-    DDGArea();
+    DDGTrack();
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);
@@ -36,4 +36,4 @@ private:
     std::vector<DDGTrackPiece> tracks;
 };
 
-#endif // DDGAREA_H
+#endif // DDGTRACK_H

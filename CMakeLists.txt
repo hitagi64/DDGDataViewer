@@ -24,7 +24,7 @@ set(PROJECT_SOURCES
         DDG/DDGMemoryBuffer.h DDG/DDGMemoryBuffer.cpp
         DDG/DDGTxm.h DDG/DDGTxm.cpp
         DDG/DDGPdb.h DDG/DDGPdb.cpp
-        DDG/DDGArea.h DDG/DDGArea.cpp
+        DDG/DDGTrack.h DDG/DDGTrack.cpp
         DDG/DDGCommon.h
         ContentTreeItem.h ContentTreeItem.cpp
         ContentPreviewer.h ContentPreviewer.cpp
