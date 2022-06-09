@@ -2,6 +2,7 @@
 #include "DDGTxm.h"
 #include "DDGPdb.h"
 #include "DDGTrack.h"
+#include "DDG/DDGEnvironment.h"
 
 DDGDat::DDGDat()
 {
@@ -65,11 +66,26 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
             continue;
         DDGMemoryBuffer subBuf = buffer.getPortion(offset, offset+size);
 
-        if (containsMapData && i == 0)
+        if (containsMapData)
         {
-            std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrack>();
-            obj->loadFromMemoryBuffer(subBuf);
-            objects.push_back(obj);
+            if (i == 0)
+            {
+                std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrack>();
+                obj->loadFromMemoryBuffer(subBuf);
+                objects.push_back(obj);
+            }
+            else if (i == 1)
+            {
+                std::shared_ptr<DDGContent> obj = std::make_shared<DDGEnvironment>();
+                obj->loadFromMemoryBuffer(subBuf);
+                objects.push_back(obj);
+            }
+            else
+            {
+                bool match;
+                std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
+                objects.push_back(obj);
+            }
         }
         else
         {

@@ -59,7 +59,7 @@ void DDGTrack::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGTrack::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGArea to Memory Buffer not yet possible.");
+    throw std::string("Saving DDGTrack to Memory Buffer not yet possible.");
     return DDGMemoryBuffer(0);
 }
 
