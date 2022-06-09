@@ -7,6 +7,7 @@
 #include "DDG/DDGTxm.h"
 #include "DDG/DDGPdb.h"
 #include "DDG/DDGTrack.h"
+#include "DDG/DDGEnvironment.h"
 
 ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -18,7 +19,8 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 
     image2DMode = false;
     pdbMode = false;
-    areaMode = false;
+    areaPointsMode = false;
+    areaLinesMode = false;
 
     cameraRotH = 0;
     cameraRotV = 0;
@@ -67,12 +69,13 @@ void ContentPreviewer::loadModelSegment(DDGModelSegment &seg)
 
 void ContentPreviewer::displayContent(DDGContent *c)
 {
-    // c may not be used outside this function
+    // variable c may not be used outside this function
     QOpenGLWidget::makeCurrent();
 
     image2DMode = false;
     pdbMode = false;
-    areaMode = false;
+    areaPointsMode = false;
+    areaLinesMode = false;
 
     DDGTxm *cI = dynamic_cast<DDGTxm*>(c);
     if (cI != nullptr)
@@ -111,15 +114,37 @@ void ContentPreviewer::displayContent(DDGContent *c)
 
         pdbMode = true;
     }
-    DDGTrack *cA = dynamic_cast<DDGTrack*>(c);
-    if (cA != nullptr)
+    DDGTrack *cT = dynamic_cast<DDGTrack*>(c);
+    if (cT != nullptr)
     {
-        std::vector<float> points = cA->getPoints();
+        std::vector<float> points = cT->getPoints();
 
         areaPointsModel = createModel(points.data(), points.size()*sizeof(float), points.size()/6, MODELTYPE_3F_3F, GL_POINTS);
         areaLinesModel = createModel(points.data(), points.size()*sizeof(float), points.size()/6, MODELTYPE_3F_3F, GL_LINES);
 
-        areaMode = true;
+        areaPointsMode = true;
+        areaLinesMode = true;
+    }
+    DDGEnvironment *cE = dynamic_cast<DDGEnvironment*>(c);
+    if (cE != nullptr)
+    {
+        std::vector<DDGVector3> points = cE->getPoints();
+
+        std::vector<float> pointsAsFloats;
+        for (DDGVector3 p : points)
+        {
+            pointsAsFloats.push_back(p.x);
+            pointsAsFloats.push_back(p.y);
+            pointsAsFloats.push_back(p.z);
+
+            pointsAsFloats.push_back(1);
+            pointsAsFloats.push_back(1);
+            pointsAsFloats.push_back(0);
+        }
+
+        areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);
+
+        areaPointsMode = true;
     }
 
     recalculateProjection();
@@ -266,14 +291,16 @@ void ContentPreviewer::paintGL()
                 drawModel(meshes[i].data);
             }
         }
-        else if (areaMode)
+        else if (areaPointsMode || areaLinesMode)
         {
             glPointSize(10);
 
             basicShaderProgram->bind();
             basicShaderProgram->setUniformValue("mvp", mvp);
-            drawModel(areaPointsModel);
-            drawModel(areaLinesModel);
+            if (areaPointsMode)
+                drawModel(areaPointsModel);
+            if (areaLinesMode)
+                drawModel(areaLinesModel);
         }
         else
         {

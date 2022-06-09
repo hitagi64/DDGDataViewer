@@ -71,7 +71,8 @@ private:
     // Modes
     bool image2DMode;
     bool pdbMode;
-    bool areaMode;
+    bool areaPointsMode;
+    bool areaLinesMode;
 
     // Camera
     float cameraRotH;

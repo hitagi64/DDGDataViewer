@@ -12,7 +12,30 @@ std::string DDGEnvironment::getType()
 
 void DDGEnvironment::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
+    unsigned int bufferCursor = 0;
 
+    typedef union {
+        float f;
+        uint32_t i;
+    } i2f;
+
+    while (bufferCursor < buffer.getSize())
+    {
+        i2f x;
+        x.i = buffer.getU32(bufferCursor);
+
+        i2f y;
+        y.i = buffer.getU32(bufferCursor + 4);
+
+        i2f z;
+        z.i = buffer.getU32(bufferCursor + 8);
+
+        unsigned int misc = buffer.getU32(bufferCursor + 12);
+
+        points.push_back(DDGVector3(x.f, y.f, z.f));
+
+        bufferCursor += 16;
+    }
 }
 
 DDGMemoryBuffer DDGEnvironment::saveAsMemoryBuffer()

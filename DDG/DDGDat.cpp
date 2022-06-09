@@ -74,7 +74,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
                 obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
-            else if (i == 1)
+            else if (i == 1 || i == 2)
             {
                 std::shared_ptr<DDGContent> obj = std::make_shared<DDGEnvironment>();
                 obj->loadFromMemoryBuffer(subBuf);
