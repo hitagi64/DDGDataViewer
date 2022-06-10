@@ -15,8 +15,10 @@ public:
     std::string getInfoAsString();
 
     std::vector<DDGVector3> getPoints();
+    std::vector<unsigned int> getPointTypes();
 private:
     std::vector<DDGVector3> points;
+    std::vector<unsigned int> pointTypes;
 };
 
 #endif // DDGENVIRONMENT_H

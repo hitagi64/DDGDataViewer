@@ -33,6 +33,7 @@ void DDGEnvironment::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         unsigned int misc = buffer.getU32(bufferCursor + 12);
 
         points.push_back(DDGVector3(x.f, y.f, z.f));
+        pointTypes.push_back(misc);
 
         bufferCursor += 16;
     }
@@ -58,4 +59,9 @@ std::string DDGEnvironment::getInfoAsString()
 std::vector<DDGVector3> DDGEnvironment::getPoints()
 {
     return points;
+}
+
+std::vector<unsigned int> DDGEnvironment::getPointTypes()
+{
+    return pointTypes;
 }
