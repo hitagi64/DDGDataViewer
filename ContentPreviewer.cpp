@@ -7,7 +7,7 @@
 #include "DDG/DDGTxm.h"
 #include "DDG/DDGPdb.h"
 #include "DDG/DDGTrack.h"
-#include "DDG/DDGEnvironment.h"
+#include "DDG/DDGTrackPoints.h"
 
 ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -125,7 +125,7 @@ void ContentPreviewer::displayContent(DDGContent *c)
         areaPointsMode = true;
         areaLinesMode = true;
     }
-    DDGEnvironment *cE = dynamic_cast<DDGEnvironment*>(c);
+    DDGTrackPoints *cE = dynamic_cast<DDGTrackPoints*>(c);
     if (cE != nullptr)
     {
         std::vector<DDGVector3> points = cE->getPoints();

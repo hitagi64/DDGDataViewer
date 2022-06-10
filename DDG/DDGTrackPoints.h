@@ -1,12 +1,12 @@
-#ifndef DDGENVIRONMENT_H
-#define DDGENVIRONMENT_H
+#ifndef DDGTRACKPOINTS_H
+#define DDGTRACKPOINTS_H
 #include "DDGContent.h"
 #include "DDGCommon.h"
 
-class DDGEnvironment : public DDGContent
+class DDGTrackPoints : public DDGContent
 {
 public:
-    DDGEnvironment();
+    DDGTrackPoints();
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);
@@ -21,4 +21,4 @@ private:
     std::vector<unsigned int> pointTypes;
 };
 
-#endif // DDGENVIRONMENT_H
+#endif // DDGTRACKPOINTS_H

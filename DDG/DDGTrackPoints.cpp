@@ -1,16 +1,16 @@
-#include "DDGEnvironment.h"
+#include "DDGTrackPoints.h"
 
-DDGEnvironment::DDGEnvironment()
+DDGTrackPoints::DDGTrackPoints()
 {
 
 }
 
-std::string DDGEnvironment::getType()
+std::string DDGTrackPoints::getType()
 {
-    return "ENVIRONMENT";
+    return "TRACKPOINTS";
 }
 
-void DDGEnvironment::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
+void DDGTrackPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
     unsigned int bufferCursor = 0;
 
@@ -39,29 +39,29 @@ void DDGEnvironment::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
     }
 }
 
-DDGMemoryBuffer DDGEnvironment::saveAsMemoryBuffer()
+DDGMemoryBuffer DDGTrackPoints::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGEnvironment to Memory Buffer not yet possible.");
+    throw std::string("Saving DDGTrackPoints to Memory Buffer not yet possible.");
     return DDGMemoryBuffer(0);
 }
 
-bool DDGEnvironment::possibleMatchForBuffer(DDGMemoryBuffer buffer)
+bool DDGTrackPoints::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 {
     return false;
 }
 
-std::string DDGEnvironment::getInfoAsString()
+std::string DDGTrackPoints::getInfoAsString()
 {
     return DDGContent::getInfoAsString()
             + "\nPoints: " + std::to_string(points.size());
 }
 
-std::vector<DDGVector3> DDGEnvironment::getPoints()
+std::vector<DDGVector3> DDGTrackPoints::getPoints()
 {
     return points;
 }
 
-std::vector<unsigned int> DDGEnvironment::getPointTypes()
+std::vector<unsigned int> DDGTrackPoints::getPointTypes()
 {
     return pointTypes;
 }
