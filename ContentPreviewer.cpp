@@ -8,6 +8,7 @@
 #include "DDG/DDGPdb.h"
 #include "DDG/DDGTrack.h"
 #include "DDG/DDGTrackPoints.h"
+#include "DDG/DDGWorldPoints.h"
 
 ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -125,11 +126,11 @@ void ContentPreviewer::displayContent(DDGContent *c)
         areaPointsMode = true;
         areaLinesMode = true;
     }
-    DDGTrackPoints *cE = dynamic_cast<DDGTrackPoints*>(c);
-    if (cE != nullptr)
+    DDGTrackPoints *cTP = dynamic_cast<DDGTrackPoints*>(c);
+    if (cTP != nullptr)
     {
-        std::vector<DDGVector3> points = cE->getPoints();
-        std::vector<unsigned int> pointTypes = cE->getPointTypes();
+        std::vector<DDGVector3> points = cTP->getPoints();
+        std::vector<unsigned int> pointTypes = cTP->getPointTypes();
 
         std::vector<float> pointsAsFloats;
         for (int i = 0; i < points.size(); i++)
@@ -140,20 +141,6 @@ void ContentPreviewer::displayContent(DDGContent *c)
             pointsAsFloats.push_back(p.y);
             pointsAsFloats.push_back(p.z);
 
-            //if (((pt>>8)&0xff) != 0x01)
-            /*if (((pt>>16)&0xff) == 0x2D && ((pt>>8)&0xff) == 0x01)
-            {
-                pointsAsFloats.push_back(0);
-                pointsAsFloats.push_back(0);
-                pointsAsFloats.push_back(1);
-            }
-            else if (((pt>>16)&0xff) == 0x35 && ((pt>>8)&0xff) == 0x01)
-            {
-                pointsAsFloats.push_back(1);
-                pointsAsFloats.push_back(0);
-                pointsAsFloats.push_back(0);
-            }*/
-            //else if (((pt>>16)&0xff) == 0x34 && ((pt>>8)&0xff) == 0x01)
             if (((pt>>29)&1) == 1)
             {
                 pointsAsFloats.push_back(0);
@@ -167,6 +154,28 @@ void ContentPreviewer::displayContent(DDGContent *c)
                 pointsAsFloats.push_back(0);
             }
 
+        }
+
+        areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);
+
+        areaPointsMode = true;
+    }
+    DDGWorldPoints *cWP = dynamic_cast<DDGWorldPoints*>(c);
+    if (cWP != nullptr)
+    {
+        std::vector<DDGVector3> points = cWP->getPoints();
+
+        std::vector<float> pointsAsFloats;
+        for (int i = 0; i < points.size(); i++)
+        {
+            DDGVector3 p = points[i];
+            pointsAsFloats.push_back(p.x);
+            pointsAsFloats.push_back(p.y);
+            pointsAsFloats.push_back(p.z);
+
+            pointsAsFloats.push_back(0);
+            pointsAsFloats.push_back(1);
+            pointsAsFloats.push_back(1);
         }
 
         areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);

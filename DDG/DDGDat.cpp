@@ -2,7 +2,8 @@
 #include "DDGTxm.h"
 #include "DDGPdb.h"
 #include "DDGTrack.h"
-#include "DDG/DDGTrackPoints.h"
+#include "DDGTrackPoints.h"
+#include "DDGWorldPoints.h"
 
 DDGDat::DDGDat()
 {
@@ -77,6 +78,12 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
             else if (i == 1 || i == 2)
             {
                 std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrackPoints>();
+                obj->loadFromMemoryBuffer(subBuf);
+                objects.push_back(obj);
+            }
+            else if (i == 7)
+            {
+                std::shared_ptr<DDGContent> obj = std::make_shared<DDGWorldPoints>();
                 obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
