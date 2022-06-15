@@ -6,12 +6,13 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
+#include <QSlider>
 
 #include "DDG/DDGContent.h"
 #include "DDG/DDGPdb.h"
 #include "DDG/DDGDat.h"
 
-enum ModelDataType
+enum MeshDataType
 {
     MODELTYPE_3F_3F,
     MODELTYPE_3F_2F,
@@ -20,7 +21,7 @@ enum ModelDataType
     MODELTYPE_3F,
 };
 
-struct ModelData
+struct MeshData
 {
     unsigned int vao = 0;
     unsigned int vbo = 0;
@@ -32,10 +33,16 @@ struct ModelData
     GLenum drawType;
 };
 
-struct ModelTextured
+struct MeshTextured
 {
-    ModelData data;
+    MeshData data;
     unsigned int texture = 0;
+};
+
+struct ModelData
+{
+    std::vector<MeshTextured> meshes;
+    QMatrix4x4 transform;
 };
 
 class ContentPreviewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
@@ -57,6 +64,7 @@ protected:
     void keyPressEvent(QKeyEvent *e) override;
     void keyReleaseEvent(QKeyEvent *e) override;
 private:
+    QSlider *bitSlider;
     // Projection
     void recalculateProjection();
     QMatrix4x4 projection;
@@ -73,6 +81,7 @@ private:
     bool pdbMode;
     bool areaPointsMode;
     bool areaLinesMode;
+    bool modelsMode;
 
     // Camera
     float cameraRotH;
@@ -87,27 +96,31 @@ public:
 
 private:
     // Base models
-    ModelData triangle;
-    ModelData grid;
-    ModelData cube;
+    MeshData triangle;
+    MeshData grid;
+    MeshData cube;
 
     // image2DMode
-    ModelData imageSurface;
+    MeshData imageSurface;
     unsigned int imagePreviewTexture;// 0 if doesn't exist
     float imageAspectRatio;
 
     // pdmMode
-    ModelData boundsModel;
-    std::vector<ModelTextured> meshes;
+    MeshData boundsModel;
+    std::vector<MeshTextured> meshes;
 
     // Area mode
-    ModelData areaPointsModel;
-    ModelData areaLinesModel;
+    MeshData areaPointsModel;
+    MeshData areaLinesModel;
+
+    // Models mode
+    std::vector<ModelData> models;
 public:
     DDGDat *textureLib;
+    DDGDat *modelLib;
 private:
     //ModelData seg1Model;
-    void loadModelSegment(DDGModelSegment &seg);
+    void loadModelSegment(DDGModelSegment &seg, std::vector<MeshTextured> &texturedMeshes);
 
     // Opengl
     QOpenGLShaderProgram *makeShaderProgram(QString vertexPath, QString fragmentPath);
@@ -123,11 +136,11 @@ private:
     std::vector<float> generatePlaneUV();
     std::vector<float> generateCubeNormal();
 
-    ModelData createModel(void *data, unsigned int dataSize, unsigned int drawCount, ModelDataType type, GLenum drawType);
-    ModelData createModelIndexed(void *data, unsigned int vertexDataSize, void *indexData, unsigned int indexDataSize, unsigned int drawCount, ModelDataType type, GLenum drawType);
-    void drawModel(ModelData model);
-    void useModel(ModelData model);
-    void deleteModel(ModelData model);
+    MeshData createModel(void *data, unsigned int dataSize, unsigned int drawCount, MeshDataType type, GLenum drawType);
+    MeshData createModelIndexed(void *data, unsigned int vertexDataSize, void *indexData, unsigned int indexDataSize, unsigned int drawCount, MeshDataType type, GLenum drawType);
+    void drawModel(MeshData model);
+    void useModel(MeshData model);
+    void deleteModel(MeshData model);
 };
 
 #endif // CONTENTPREVIEWER_H

@@ -4,6 +4,7 @@
 #include "DDGTrack.h"
 #include "DDGTrackPoints.h"
 #include "DDGWorldPoints.h"
+#include "DDGTest.h"
 
 DDGDat::DDGDat()
 {
@@ -81,6 +82,12 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
                 obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
+            else if (i == 3 || i == 5)
+            {
+                std::shared_ptr<DDGContent> obj = std::make_shared<DDGTest>();
+                obj->loadFromMemoryBuffer(subBuf);
+                objects.push_back(obj);
+            }
             else if (i == 7)
             {
                 std::shared_ptr<DDGContent> obj = std::make_shared<DDGWorldPoints>();
@@ -96,9 +103,18 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         }
         else
         {
-            bool match;
-            std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
-            objects.push_back(obj);
+            //if (i == 6)
+            //{
+            //    std::shared_ptr<DDGContent> obj = std::make_shared<DDGTest>();
+            //    obj->loadFromMemoryBuffer(subBuf);
+            //    objects.push_back(obj);
+            //}
+            //else
+            //{
+                bool match;
+                std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
+                objects.push_back(obj);
+            //}
         }
     }
 }

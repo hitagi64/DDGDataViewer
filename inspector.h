@@ -30,6 +30,8 @@ private slots:
     void on_actionPdm_get_before_buffer_1_vals_triggered();
     void on_actionSet_DAT_as_active_texture_lib_triggered();
     void on_actionFly_Mode_triggered();
+    void on_actionSet_DAT_as_active_model_lib_triggered();
+
 private:
     Ui::Inspector *ui;
 

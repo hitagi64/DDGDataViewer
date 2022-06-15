@@ -289,3 +289,13 @@ void Inspector::on_actionFly_Mode_triggered()
     ui->previewer->flyMode = ui->actionFly_Mode->isChecked();
 }
 
+
+void Inspector::on_actionSet_DAT_as_active_model_lib_triggered()
+{
+    DDGDat *cD = dynamic_cast<DDGDat*>(selected);
+    if (cD != nullptr)
+    {
+        ui->previewer->modelLib = cD;
+    }
+}
+

@@ -9,6 +9,7 @@
 #include "DDG/DDGTrack.h"
 #include "DDG/DDGTrackPoints.h"
 #include "DDG/DDGWorldPoints.h"
+#include "DDG/DDGTest.h"
 
 ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -31,21 +32,27 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
     imagePreviewTexture = 0;
 
     textureLib = 0;
+    modelLib = 0;
 
     fastMode = 0;
     flyMode = 0;
+    modelsMode = 0;
 
     direction = QVector3D(0, 0, 0);
     position = QVector3D(0, 0, 0);
+
+    bitSlider = new QSlider(Qt::Orientation::Horizontal, this);
+    bitSlider->setRange(0, 32);
+    bitSlider->resize(640, 30);
 }
 
-void ContentPreviewer::loadModelSegment(DDGModelSegment &seg)
+void ContentPreviewer::loadModelSegment(DDGModelSegment &seg, std::vector<MeshTextured> &texturedMeshes)
 {
     for (DDGVertexSegment &vseg : seg.vertexSegments)
     {
         std::vector<float> vertices = DDGPdb::convertSegmentToVertexArray(vseg);
 
-        ModelTextured m;
+        MeshTextured m;
         m.data = createModel(vertices.data(), vertices.size()*sizeof(float),
                         vertices.size()/6, MODELTYPE_3F_3F_2F, GL_TRIANGLES);
 
@@ -64,7 +71,7 @@ void ContentPreviewer::loadModelSegment(DDGModelSegment &seg)
             }
         }
 
-        meshes.push_back(m);
+        texturedMeshes.push_back(m);
     }
 }
 
@@ -77,6 +84,7 @@ void ContentPreviewer::displayContent(DDGContent *c)
     pdbMode = false;
     areaPointsMode = false;
     areaLinesMode = false;
+    modelsMode = false;
 
     DDGTxm *cI = dynamic_cast<DDGTxm*>(c);
     if (cI != nullptr)
@@ -109,9 +117,9 @@ void ContentPreviewer::displayContent(DDGContent *c)
                 deleteModel(meshes[i].data);
         meshes.clear();
 
-        loadModelSegment(seg1);
-        loadModelSegment(seg2);
-        loadModelSegment(seg3);
+        loadModelSegment(seg1, meshes);
+        loadModelSegment(seg2, meshes);
+        loadModelSegment(seg3, meshes);
 
         pdbMode = true;
     }
@@ -163,7 +171,68 @@ void ContentPreviewer::displayContent(DDGContent *c)
     DDGWorldPoints *cWP = dynamic_cast<DDGWorldPoints*>(c);
     if (cWP != nullptr)
     {
-        std::vector<DDGVector3> points = cWP->getPoints();
+        std::vector<DDGWorldPoint> points = cWP->getPoints();
+
+        std::vector<float> pointsAsFloats;
+        for (int i = 0; i < points.size(); i++)
+        {
+            DDGVector3 p = points[i].position;
+            pointsAsFloats.push_back(p.x);
+            pointsAsFloats.push_back(p.y);
+            pointsAsFloats.push_back(p.z);
+
+            pointsAsFloats.push_back(0);
+            pointsAsFloats.push_back(1);
+            pointsAsFloats.push_back(1);
+        }
+
+        areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);
+
+        areaPointsMode = true;
+
+        for (ModelData &model : models)
+            for (int i = 0; i < model.meshes.size(); i++)
+                if (model.meshes[i].data.vao != 0)
+                    deleteModel(model.meshes[i].data);
+
+        models.clear();
+
+        for (int i = 0; i < points.size(); i++)
+        {
+            ModelData model;
+
+            model.transform.translate(
+                        points[i].position.x, points[i].position.y, points[i].position.z
+                        );
+            model.transform.rotate(points[i].rotation*57.29577, 0, 1, 0);
+
+
+            unsigned int modelIndex = points[i].modelIndex;//(points[i].b >> bitSlider->value()) & 0x1ff;
+
+            if (modelLib == 0)
+                break;
+            if (modelIndex >= modelLib->getObjects().size())
+                continue;
+
+            DDGPdb *pdb = dynamic_cast<DDGPdb*>(modelLib->getObjects()[modelIndex].get());
+            if (pdb == nullptr)
+                continue;
+            DDGModelSegment seg1 = pdb->getModelSegment1();
+            DDGModelSegment seg2 = pdb->getModelSegment2();
+            DDGModelSegment seg3 = pdb->getModelSegment3();
+
+            loadModelSegment(seg1, model.meshes);
+            loadModelSegment(seg2, model.meshes);
+            loadModelSegment(seg3, model.meshes);
+
+            models.push_back(model);
+        }
+        modelsMode = true;
+    }
+    DDGTest *cTest = dynamic_cast<DDGTest*>(c);
+    if (cTest != nullptr)
+    {
+        std::vector<DDGVector3> points = cTest->getPoints();
 
         std::vector<float> pointsAsFloats;
         for (int i = 0; i < points.size(); i++)
@@ -327,7 +396,26 @@ void ContentPreviewer::paintGL()
                 drawModel(meshes[i].data);
             }
         }
-        else if (areaPointsMode || areaLinesMode)
+        if (modelsMode)
+        {
+            glPointSize(10);
+
+            texturedLitShader->bind();
+
+            for (int i = 0; i < models.size(); i++)
+            {
+                QMatrix4x4 mvp;
+                mvp = projection * view * models[i].transform;
+                texturedLitShader->setUniformValue("mvp", mvp);
+                for (int j = 0; j < models[i].meshes.size(); j++)
+                {
+                    if (models[i].meshes[j].texture != 0)
+                        useTexture(models[i].meshes[j].texture);
+                    drawModel(models[i].meshes[j].data);
+                }
+            }
+        }
+        if (areaPointsMode || areaLinesMode)
         {
             glPointSize(10);
 
@@ -338,7 +426,7 @@ void ContentPreviewer::paintGL()
             if (areaLinesMode)
                 drawModel(areaLinesModel);
         }
-        else
+        if (!(pdbMode || modelsMode || areaPointsMode || areaLinesMode))
         {
             litShader->bind();
             litShader->setUniformValue("mvp", mvp);
@@ -572,11 +660,11 @@ std::vector<float> ContentPreviewer::generateCubeNormal()
     return std::vector<float>(std::begin(vertices), std::end(vertices));
 }
 
-ModelData ContentPreviewer::createModel(void *data, unsigned int dataSize,
-                                        unsigned int drawCount, ModelDataType type,
+MeshData ContentPreviewer::createModel(void *data, unsigned int dataSize,
+                                        unsigned int drawCount, MeshDataType type,
                                         GLenum drawType)
 {
-    ModelData model;
+    MeshData model;
     model.drawCount = drawCount;
     model.usesEBO = false;
     model.drawType = drawType;
@@ -631,12 +719,12 @@ ModelData ContentPreviewer::createModel(void *data, unsigned int dataSize,
     return model;
 }
 
-ModelData ContentPreviewer::createModelIndexed(void *vertexData, unsigned int vertexDataSize,
+MeshData ContentPreviewer::createModelIndexed(void *vertexData, unsigned int vertexDataSize,
                                                void *indexData, unsigned int indexDataSize,
-                                               unsigned int drawCount, ModelDataType type,
+                                               unsigned int drawCount, MeshDataType type,
                                                GLenum drawType)
 {
-    ModelData d = createModel(vertexData, vertexDataSize, drawCount, type, drawType);
+    MeshData d = createModel(vertexData, vertexDataSize, drawCount, type, drawType);
 
     d.usesEBO = true;
 
@@ -647,7 +735,7 @@ ModelData ContentPreviewer::createModelIndexed(void *vertexData, unsigned int ve
     return d;
 }
 
-void ContentPreviewer::drawModel(ModelData model)
+void ContentPreviewer::drawModel(MeshData model)
 {
     useModel(model);
     if (model.usesEBO == false)
@@ -660,12 +748,12 @@ void ContentPreviewer::drawModel(ModelData model)
     }
 }
 
-void ContentPreviewer::useModel(ModelData model)
+void ContentPreviewer::useModel(MeshData model)
 {
     glBindVertexArray(model.vao);
 }
 
-void ContentPreviewer::deleteModel(ModelData model)
+void ContentPreviewer::deleteModel(MeshData model)
 {
     glDeleteVertexArrays(1, &model.vao);
     deleteVBO(model.vbo);

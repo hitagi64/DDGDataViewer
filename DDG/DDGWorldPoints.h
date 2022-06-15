@@ -3,6 +3,13 @@
 #include "DDGContent.h"
 #include "DDGCommon.h"
 
+struct DDGWorldPoint
+{
+    DDGVector3 position;
+    float rotation;
+    uint16_t modelIndex;
+};
+
 class DDGWorldPoints : public DDGContent
 {
 public:
@@ -14,9 +21,9 @@ public:
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
     std::string getInfoAsString();
 
-    std::vector<DDGVector3> getPoints();
+    std::vector<DDGWorldPoint> getPoints();
 private:
-    std::vector<DDGVector3> points;
+    std::vector<DDGWorldPoint> points;
 };
 
 #endif // DDGWORLDPOINTS_H

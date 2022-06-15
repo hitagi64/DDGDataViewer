@@ -1,7 +1,6 @@
 #ifndef DDGCONTENT_H
 #define DDGCONTENT_H
 #include <string>
-#include <QFileDevice>
 #include "DDGMemoryBuffer.h"
 
 class DDGContent
@@ -15,6 +14,5 @@ public:
 
     virtual std::string getInfoAsString();
 };
-Q_DECLARE_METATYPE(DDGContent)
 
 #endif // DDGCONTENT_H

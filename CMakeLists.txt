@@ -27,6 +27,7 @@ set(PROJECT_SOURCES
         DDG/DDGTrack.h DDG/DDGTrack.cpp
         DDG/DDGTrackPoints.h DDG/DDGTrackPoints.cpp
         DDG/DDGWorldPoints.h DDG/DDGWorldPoints.cpp
+        DDG/DDGTest.h DDG/DDGTest.cpp
         DDG/DDGCommon.h
         ContentTreeItem.h ContentTreeItem.cpp
         ContentPreviewer.h ContentPreviewer.cpp
