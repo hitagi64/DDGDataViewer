@@ -218,22 +218,13 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
 
 float DDGPdb::fixedPoint412BitToFloat(uint16_t v)
 {
-    // This function is so bad.
-    // Please rewrite
+    int16_t resA = (v >> 12) & 15;
+    //resA += resA & 32768;
 
-    union U2I {
-        int16_t s;
-        uint16_t u;
-    } u2i;
+    uint16_t resB = v & 4095;
+    float resBF = resB / 4096.f;
 
-    u2i.u = (v >> 12) & 7;
-    bool vSign = (v >> 15) & 1;
-    int16_t vSigned = u2i.s | (((uint16_t)vSign) << 15);
-    float vDec = (((float)(v & 4095))/4095.0f);
-    if (!vSign)
-        return ((float)vSigned) + vDec;
-    else
-        return ((float)vSigned) - vDec;
+    return ((float)resA) + resBF;
 }
 
 bool DDGPdb::possibleMatchForBuffer(DDGMemoryBuffer buffer)
