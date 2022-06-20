@@ -1,12 +1,12 @@
-#ifndef DDGTEST_H
-#define DDGTEST_H
+#ifndef DDGMAPMODELLUT_H
+#define DDGMAPMODELLUT_H
 #include "DDGContent.h"
 #include "DDGCommon.h"
 
-class DDGTest : public DDGContent
+class DDGMapModelLUT : public DDGContent
 {
 public:
-    DDGTest();
+    DDGMapModelLUT();
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);
@@ -18,4 +18,4 @@ private:
     std::vector<int16_t> entries;
 };
 
-#endif // DDGTEST_H
+#endif // DDGMAPMODELLUT_H

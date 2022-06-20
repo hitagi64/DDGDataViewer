@@ -154,7 +154,7 @@
     <addaction name="actionPdm_get_before_buffer_1_vals"/>
     <addaction name="actionSet_DAT_as_active_texture_lib"/>
     <addaction name="actionSet_DAT_as_active_model_lib"/>
-    <addaction name="actionSet_TEST_as_active_model_LUT"/>
+    <addaction name="actionSet_MAPMODELLUT_as_active"/>
    </widget>
    <widget class="QMenu" name="menuPreviewer">
     <property name="title">
@@ -218,9 +218,12 @@
     <string>Set DAT as active model lib</string>
    </property>
   </action>
-  <action name="actionSet_TEST_as_active_model_LUT">
+  <action name="actionSet_MAPMODELLUT_as_active">
    <property name="text">
-    <string>Set TEST as active model LUT</string>
+    <string>Set MAPMODELLUT as active</string>
+   </property>
+   <property name="toolTip">
+    <string>Set MAPMODELLUT as active</string>
    </property>
   </action>
  </widget>

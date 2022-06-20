@@ -11,7 +11,7 @@
 #include "DDG/DDGContent.h"
 #include "DDG/DDGPdb.h"
 #include "DDG/DDGDat.h"
-#include "DDG/DDGTest.h"
+#include "DDG/DDGMapModelLUT.h"
 
 enum MeshDataType
 {
@@ -118,7 +118,7 @@ private:
 public:
     DDGDat *textureLib;
     DDGDat *modelLib;
-    DDGTest *modelLUT;
+    DDGMapModelLUT *modelLUT;
 private:
     //ModelData seg1Model;
     void loadModelSegment(DDGModelSegment &seg, std::vector<MeshTextured> &texturedMeshes);

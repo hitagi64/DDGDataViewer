@@ -9,7 +9,7 @@
 #include "DDG/DDGTrack.h"
 #include "DDG/DDGTrackPoints.h"
 #include "DDG/DDGWorldPoints.h"
-#include "DDG/DDGTest.h"
+#include "DDG/DDGMapModelLUT.h"
 
 ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 {

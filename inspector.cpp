@@ -289,7 +289,6 @@ void Inspector::on_actionFly_Mode_triggered()
     ui->previewer->flyMode = ui->actionFly_Mode->isChecked();
 }
 
-
 void Inspector::on_actionSet_DAT_as_active_model_lib_triggered()
 {
     DDGDat *cD = dynamic_cast<DDGDat*>(selected);
@@ -299,10 +298,9 @@ void Inspector::on_actionSet_DAT_as_active_model_lib_triggered()
     }
 }
 
-
-void Inspector::on_actionSet_TEST_as_active_model_LUT_triggered()
+void Inspector::on_actionSet_MAPMODELLUT_as_active_triggered()
 {
-    DDGTest *cT = dynamic_cast<DDGTest*>(selected);
+    DDGMapModelLUT *cT = dynamic_cast<DDGMapModelLUT*>(selected);
     if (cT != nullptr)
     {
         ui->previewer->modelLUT = cT;
