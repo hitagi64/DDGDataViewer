@@ -1,5 +1,28 @@
 #ifndef DDGCOMMON_H
 #define DDGCOMMON_H
+#include <memory>
+
+struct DDGColorU8
+{
+    DDGColorU8()
+    {
+        r = 0;
+        g = 0;
+        b = 0;
+        a = 0;
+    }
+    DDGColorU8(uint8_t x, uint8_t y, uint8_t z, uint8_t w)
+    {
+        this->r = x;
+        this->g = y;
+        this->b = z;
+        this->a = w;
+    }
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+};
 
 struct DDGVector4
 {

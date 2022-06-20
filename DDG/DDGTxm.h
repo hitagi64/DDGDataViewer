@@ -2,6 +2,7 @@
 #define DDGTXM_H
 
 #include "DDGContent.h"
+#include "DDGCommon.h"
 #include <QMetaEnum>
 
 enum DDGTxmPixelFormat : uint8_t
@@ -44,6 +45,8 @@ public:
 private:
     static uint8_t getTxmPixelFormatBitCount(DDGTxmPixelFormat p);
     static std::string txmPixelFormatAsString(DDGTxmPixelFormat format);
+
+    inline DDGColorU8 getColorFromClutAt(unsigned int index);
 
     DDGTxmPixelFormat imagePixelType;
     uint16_t imageWidth;

@@ -14,7 +14,6 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
     int headerSize = 16;
 
-
     if (buffer.getU8(0) == 'T' &&
         buffer.getU8(1) == 'X' &&
         buffer.getU8(2) == 'D')
@@ -142,8 +141,8 @@ DDGImage DDGTxm::convertToImage()
 
     unsigned int totalImageSize = (imageWidth * imageHeight * getTxmPixelFormatBitCount(imagePixelType))/8;
 
-    uint8_t bpp = getTxmPixelFormatBitCount(imagePixelType);
-    if (bpp > 0)
+    //uint8_t bpp = getTxmPixelFormatBitCount(imagePixelType);
+    if (clutPixelType == PSMCT32 || clutPixelType == PSMCT16)
     {
         unsigned int i = 0;
         while(i < totalImageSize)
@@ -155,15 +154,18 @@ DDGImage DDGTxm::convertToImage()
                 uint8_t firstIndex = doubleIndex & 0xF;
                 uint8_t secondIndex = (doubleIndex >> 4) & 0xF;
 
-                image.data.get()[i*8]   = clutData.getU8(firstIndex*4);
-                image.data.get()[i*8+1] = clutData.getU8(firstIndex*4+1);
-                image.data.get()[i*8+2] = clutData.getU8(firstIndex*4+2);
-                image.data.get()[i*8+3] = clutData.getU8(firstIndex*4+3);
+                DDGColorU8 c1 = getColorFromClutAt(firstIndex);
+                DDGColorU8 c2 = getColorFromClutAt(secondIndex);
 
-                image.data.get()[i*8+4] = clutData.getU8(secondIndex*4+0);
-                image.data.get()[i*8+5] = clutData.getU8(secondIndex*4+1);
-                image.data.get()[i*8+6] = clutData.getU8(secondIndex*4+2);
-                image.data.get()[i*8+7] = clutData.getU8(secondIndex*4+3);
+                image.data.get()[i*8]   = c1.r;
+                image.data.get()[i*8+1] = c1.g;
+                image.data.get()[i*8+2] = c1.b;
+                image.data.get()[i*8+3] = c1.a;
+
+                image.data.get()[i*8+4] = c2.r;
+                image.data.get()[i*8+5] = c2.g;
+                image.data.get()[i*8+6] = c2.b;
+                image.data.get()[i*8+7] = c2.a;
 
                 i++;
             }
@@ -171,10 +173,12 @@ DDGImage DDGTxm::convertToImage()
             {
                 uint8_t index = imageData.getU8(i);
 
-                image.data.get()[i*4]   = clutData.getU8(index*4);
-                image.data.get()[i*4+1] = clutData.getU8(index*4+1);
-                image.data.get()[i*4+2] = clutData.getU8(index*4+2);
-                image.data.get()[i*4+3] = clutData.getU8(index*4+3);
+                DDGColorU8 c = getColorFromClutAt(index);
+
+                image.data.get()[i*4]   = c.r;
+                image.data.get()[i*4+1] = c.g;
+                image.data.get()[i*4+2] = c.b;
+                image.data.get()[i*4+3] = c.a;
 
                 i++;
             }
@@ -274,4 +278,27 @@ std::string DDGTxm::txmPixelFormatAsString(DDGTxmPixelFormat format)
     default:
         return "Unknown";
     }
+}
+
+DDGColorU8 DDGTxm::getColorFromClutAt(unsigned int index)
+{
+    DDGColorU8 c;
+    c.r = 255;
+    c.a = 255;
+    if (clutPixelType == PSMCT32)
+    {
+        c.r = clutData.getU8(index*4);
+        c.g = clutData.getU8(index*4+1);
+        c.b = clutData.getU8(index*4+2);
+        c.a = clutData.getU8(index*4+3);
+    }
+    else if (clutPixelType == PSMCT16)
+    {
+        uint32_t cr = clutData.getU16(index*2);
+        c.r = (cr       & 31) << 3;
+        c.g = ((cr>>5)  & 31) << 3;
+        c.b = ((cr>>10) & 31) << 3;
+        c.a = ((cr>>15) & 1) * 255;
+    }
+    return c;
 }
