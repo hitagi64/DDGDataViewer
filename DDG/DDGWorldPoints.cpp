@@ -21,8 +21,6 @@ void DDGWorldPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         uint32_t i;
     } i2f;
 
-    std::map<uint16_t, uint16_t> modelIndexes;
-
     while (bufferCursor < buffer.getSize())
     {
         i2f x;
@@ -42,24 +40,9 @@ void DDGWorldPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         wp.modelIndex = buffer.getU16(bufferCursor + 20);
         wp.rotation = r.f;
         points.push_back(wp);
-        modelIndexes[wp.modelIndex] = 0;
 
         bufferCursor += 24;
     }
-
-    int i = 0;
-    for (auto &index : modelIndexes)
-    {
-        index.second = i;
-        i++;
-    }
-
-    for (DDGWorldPoint &p : points)
-    {
-        p.modelIndex = modelIndexes[p.modelIndex];
-    }
-
-    std::cout << "modelindexes size: " << modelIndexes.size() << std::endl;
 }
 
 DDGMemoryBuffer DDGWorldPoints::saveAsMemoryBuffer()

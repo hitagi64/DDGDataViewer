@@ -154,6 +154,7 @@
     <addaction name="actionPdm_get_before_buffer_1_vals"/>
     <addaction name="actionSet_DAT_as_active_texture_lib"/>
     <addaction name="actionSet_DAT_as_active_model_lib"/>
+    <addaction name="actionSet_TEST_as_active_model_LUT"/>
    </widget>
    <widget class="QMenu" name="menuPreviewer">
     <property name="title">
@@ -215,6 +216,11 @@
   <action name="actionSet_DAT_as_active_model_lib">
    <property name="text">
     <string>Set DAT as active model lib</string>
+   </property>
+  </action>
+  <action name="actionSet_TEST_as_active_model_LUT">
+   <property name="text">
+    <string>Set TEST as active model LUT</string>
    </property>
   </action>
  </widget>

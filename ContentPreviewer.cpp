@@ -33,6 +33,7 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 
     textureLib = 0;
     modelLib = 0;
+    modelLUT = 0;
 
     fastMode = 0;
     flyMode = 0;
@@ -40,10 +41,6 @@ ContentPreviewer::ContentPreviewer(QWidget *parent) : QOpenGLWidget(parent)
 
     direction = QVector3D(0, 0, 0);
     position = QVector3D(0, 0, 0);
-
-    bitSlider = new QSlider(Qt::Orientation::Horizontal, this);
-    bitSlider->setRange(0, 32);
-    bitSlider->resize(640, 30);
 }
 
 void ContentPreviewer::loadModelSegment(DDGModelSegment &seg, std::vector<MeshTextured> &texturedMeshes)
@@ -206,15 +203,21 @@ void ContentPreviewer::displayContent(DDGContent *c)
                         );
             model.transform.rotate(points[i].rotation*57.29577, 0, 1, 0);
 
+            unsigned int modelMapIndex = points[i].modelIndex;//(points[i].b >> bitSlider->value()) & 0x1ff;
 
-            unsigned int modelIndex = points[i].modelIndex;//(points[i].b >> bitSlider->value()) & 0x1ff;
+            if (modelLUT == 0)
+                break;
+            if (modelMapIndex > modelLUT->getEntries().size())
+                continue;
+
+            unsigned int modelDatIndex = modelLUT->getEntries()[modelMapIndex];
 
             if (modelLib == 0)
                 break;
-            if (modelIndex >= modelLib->getObjects().size())
+            if (modelDatIndex >= modelLib->getObjects().size())
                 continue;
 
-            DDGPdb *pdb = dynamic_cast<DDGPdb*>(modelLib->getObjects()[modelIndex].get());
+            DDGPdb *pdb = dynamic_cast<DDGPdb*>(modelLib->getObjects()[modelDatIndex].get());
             if (pdb == nullptr)
                 continue;
             DDGModelSegment seg1 = pdb->getModelSegment1();
@@ -229,7 +232,7 @@ void ContentPreviewer::displayContent(DDGContent *c)
         }
         modelsMode = true;
     }
-    DDGTest *cTest = dynamic_cast<DDGTest*>(c);
+    /*DDGTest *cTest = dynamic_cast<DDGTest*>(c);
     if (cTest != nullptr)
     {
         std::vector<DDGVector3> points = cTest->getPoints();
@@ -250,7 +253,7 @@ void ContentPreviewer::displayContent(DDGContent *c)
         areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);
 
         areaPointsMode = true;
-    }
+    }*/
 
     recalculateProjection();
 }

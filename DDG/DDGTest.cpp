@@ -12,35 +12,13 @@ std::string DDGTest::getType()
 
 void DDGTest::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
-    unsigned int bufferCursor = 0;
+    int16_t itemCount = buffer.getU16(0);
+    if (itemCount < 0)
+        return;
 
-    typedef union {
-        float f;
-        uint32_t i;
-    } i2f;
-
-    while (bufferCursor < buffer.getSize())
+    for (unsigned int i = 0; i < itemCount; i++)
     {
-        i2f x;
-        x.i = buffer.getU32(bufferCursor + 12);
-
-        i2f y;
-        y.i = buffer.getU32(bufferCursor + 28);
-
-        i2f z;
-        z.i = buffer.getU32(bufferCursor + 44);
-        /*i2f x;
-        x.i = buffer.getU32(bufferCursor + 44);
-
-        i2f y;
-        y.i = buffer.getU32(bufferCursor + 48);
-
-        i2f z;
-        z.i = buffer.getU32(bufferCursor + 52);*/
-
-        points.push_back(DDGVector3(x.f, y.f, z.f));
-
-        bufferCursor += 56;
+        entries.push_back(buffer.getU16(2 + (i*2)));
     }
 }
 
@@ -58,11 +36,11 @@ bool DDGTest::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 std::string DDGTest::getInfoAsString()
 {
     std::string result = DDGContent::getInfoAsString()
-            + "\nCount: " + std::to_string(points.size());
+            + "\nCount: " + std::to_string(entries.size());
     return result;
 }
 
-std::vector<DDGVector3> DDGTest::getPoints()
+std::vector<int16_t> DDGTest::getEntries()
 {
-    return points;
+    return entries;
 }

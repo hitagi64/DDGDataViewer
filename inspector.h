@@ -32,6 +32,8 @@ private slots:
     void on_actionFly_Mode_triggered();
     void on_actionSet_DAT_as_active_model_lib_triggered();
 
+    void on_actionSet_TEST_as_active_model_LUT_triggered();
+
 private:
     Ui::Inspector *ui;
 

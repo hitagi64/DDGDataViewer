@@ -11,6 +11,7 @@
 #include "DDG/DDGContent.h"
 #include "DDG/DDGPdb.h"
 #include "DDG/DDGDat.h"
+#include "DDG/DDGTest.h"
 
 enum MeshDataType
 {
@@ -64,7 +65,6 @@ protected:
     void keyPressEvent(QKeyEvent *e) override;
     void keyReleaseEvent(QKeyEvent *e) override;
 private:
-    QSlider *bitSlider;
     // Projection
     void recalculateProjection();
     QMatrix4x4 projection;
@@ -118,6 +118,7 @@ private:
 public:
     DDGDat *textureLib;
     DDGDat *modelLib;
+    DDGTest *modelLUT;
 private:
     //ModelData seg1Model;
     void loadModelSegment(DDGModelSegment &seg, std::vector<MeshTextured> &texturedMeshes);

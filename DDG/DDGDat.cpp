@@ -103,18 +103,18 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         }
         else
         {
-            //if (i == 6)
-            //{
-            //    std::shared_ptr<DDGContent> obj = std::make_shared<DDGTest>();
-            //    obj->loadFromMemoryBuffer(subBuf);
-            //    objects.push_back(obj);
-            //}
-            //else
-            //{
+            if (i == 2)
+            {
+                std::shared_ptr<DDGContent> obj = std::make_shared<DDGTest>();
+                obj->loadFromMemoryBuffer(subBuf);
+                objects.push_back(obj);
+            }
+            else
+            {
                 bool match;
                 std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
                 objects.push_back(obj);
-            //}
+            }
         }
     }
 }

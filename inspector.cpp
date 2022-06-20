@@ -299,3 +299,13 @@ void Inspector::on_actionSet_DAT_as_active_model_lib_triggered()
     }
 }
 
+
+void Inspector::on_actionSet_TEST_as_active_model_LUT_triggered()
+{
+    DDGTest *cT = dynamic_cast<DDGTest*>(selected);
+    if (cT != nullptr)
+    {
+        ui->previewer->modelLUT = cT;
+    }
+}
+

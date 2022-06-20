@@ -13,9 +13,9 @@ public:
     DDGMemoryBuffer saveAsMemoryBuffer();
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
     std::string getInfoAsString();
-    std::vector<DDGVector3> getPoints();
+    std::vector<int16_t> getEntries();
 private:
-    std::vector<DDGVector3> points;
+    std::vector<int16_t> entries;
 };
 
 #endif // DDGTEST_H
