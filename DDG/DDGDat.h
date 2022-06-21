@@ -24,6 +24,8 @@ public:
 
     static std::shared_ptr<DDGContent> findAndLoadContentFromBuffer(DDGMemoryBuffer buffer, bool &foundMatch);
 private:
+    bool isThisDatAreapac();
+    bool isThisDatAreapacMapData();
     uint32_t objectCount;
     std::vector<std::shared_ptr<DDGContent>> objects;
     bool containsMapData;

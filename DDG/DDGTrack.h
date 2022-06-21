@@ -9,14 +9,14 @@ struct DDGTrackPiece
     DDGVector3 p1;
     DDGVector3 p2;
 
-    int nextSpline;
-    int previousSpline;
+    int nextTrack;
+    int previousTrack;
 
     int startDistance;
     int endDistance;
 
-    int misc1;
-    int misc2;
+    int beginTrackPointIndex;
+    int endTrackPointIndex;
 };
 
 class DDGTrack : public DDGContent

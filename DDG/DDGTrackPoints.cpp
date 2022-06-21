@@ -30,10 +30,13 @@ void DDGTrackPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         i2f z;
         z.i = buffer.getU32(bufferCursor + 8);
 
-        unsigned int misc = buffer.getU32(bufferCursor + 12);
+        unsigned int pointType = buffer.getU32(bufferCursor + 12);
 
-        points.push_back(DDGVector3(x.f, y.f, z.f));
-        pointTypes.push_back(misc);
+        DDGTrackPoint point;
+        point.position = DDGVector3(x.f, y.f, z.f);
+        point.isOverheadWire = ((pointType>>29)&1) == 1;
+
+        points.push_back(point);
 
         bufferCursor += 16;
     }
@@ -56,12 +59,7 @@ std::string DDGTrackPoints::getInfoAsString()
             + "\nPoints: " + std::to_string(points.size());
 }
 
-std::vector<DDGVector3> DDGTrackPoints::getPoints()
+std::vector<DDGTrackPoint> DDGTrackPoints::getPoints()
 {
     return points;
-}
-
-std::vector<unsigned int> DDGTrackPoints::getPointTypes()
-{
-    return pointTypes;
 }

@@ -43,17 +43,18 @@ void DDGTrack::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         track.p1 = DDGVector3(x.f, y.f, z.f);
         track.p2 = DDGVector3(x2.f, y2.f, z2.f);
 
-        track.nextSpline = buffer.getU32(bufferCursor + 24);
-        track.previousSpline = buffer.getU32(bufferCursor + 32);
+        track.nextTrack = buffer.getU32(bufferCursor + 24);
+        track.previousTrack = buffer.getU32(bufferCursor + 32);
 
         track.startDistance = buffer.getU32(bufferCursor + 40);
         track.endDistance = buffer.getU32(bufferCursor + 44);
 
-        track.misc1 = buffer.getU32(bufferCursor + 52);
-        track.misc2 = buffer.getU32(bufferCursor + 56);
+        track.beginTrackPointIndex = buffer.getU32(bufferCursor + 52);
+        track.endTrackPointIndex = buffer.getU32(bufferCursor + 56);
+
+        tracks.push_back(track);
 
         bufferCursor += 76;
-        tracks.push_back(track);
     }
 }
 
@@ -82,7 +83,8 @@ std::vector<float> DDGTrack::getPoints()
         points.push_back(track.p1.x);
         points.push_back(track.p1.y);
         points.push_back(track.p1.z);
-        if (track.misc1 == -1)
+
+        if (track.beginTrackPointIndex == -1)
         {
             points.push_back(0);
             points.push_back(1.0f);
@@ -98,7 +100,8 @@ std::vector<float> DDGTrack::getPoints()
         points.push_back(track.p2.x);
         points.push_back(track.p2.y);
         points.push_back(track.p2.z);
-        if (track.misc2 == -1)
+
+        if (track.endTrackPointIndex == -1)
         {
             points.push_back(0);
             points.push_back(1.0f);

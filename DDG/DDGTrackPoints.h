@@ -3,6 +3,12 @@
 #include "DDGContent.h"
 #include "DDGCommon.h"
 
+struct DDGTrackPoint
+{
+    DDGVector3 position;
+    bool isOverheadWire;
+};
+
 class DDGTrackPoints : public DDGContent
 {
 public:
@@ -14,11 +20,9 @@ public:
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
     std::string getInfoAsString();
 
-    std::vector<DDGVector3> getPoints();
-    std::vector<unsigned int> getPointTypes();
+    std::vector<DDGTrackPoint> getPoints();
 private:
-    std::vector<DDGVector3> points;
-    std::vector<unsigned int> pointTypes;
+    std::vector<DDGTrackPoint> points;
 };
 
 #endif // DDGTRACKPOINTS_H

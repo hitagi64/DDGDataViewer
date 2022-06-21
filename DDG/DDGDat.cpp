@@ -68,7 +68,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
             continue;
         DDGMemoryBuffer subBuf = buffer.getPortion(offset, offset+size);
 
-        if (containsMapData)
+        if (isThisDatAreapacMapData())
         {
             if (i == 0)
             {
@@ -79,12 +79,6 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
             else if (i == 1 || i == 2)
             {
                 std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrackPoints>();
-                obj->loadFromMemoryBuffer(subBuf);
-                objects.push_back(obj);
-            }
-            else if (i == 3 || i == 5)
-            {
-                std::shared_ptr<DDGContent> obj = std::make_shared<DDGMapModelLUT>();
                 obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
@@ -103,7 +97,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         }
         else
         {
-            if (i == 2)
+            if (i == 2 && isThisDatAreapac())
             {
                 std::shared_ptr<DDGContent> obj = std::make_shared<DDGMapModelLUT>();
                 obj->loadFromMemoryBuffer(subBuf);
@@ -176,4 +170,38 @@ std::shared_ptr<DDGContent> DDGDat::findAndLoadContentFromBuffer(DDGMemoryBuffer
         foundMatch = false;
         return std::make_shared<DDGContent>();
     }
+}
+
+bool DDGDat::isThisDatAreapac()
+{
+    if (objectCount != 4)
+        return false;
+
+    if (objects.size() < 2)
+        return false;
+
+    DDGDat *cD1 = dynamic_cast<DDGDat*>(objects[0].get());
+    if (cD1 == nullptr)
+        return false;
+
+    if (cD1->objects.size() != 9)
+        return false;
+
+    DDGDat *cD2 = dynamic_cast<DDGDat*>(objects[1].get());
+    if (cD2 == nullptr)
+        return false;
+
+    if (cD2->getObjects().size() < 1)
+        return false;
+
+    DDGPdb *cD2Pdb = dynamic_cast<DDGPdb*>(cD2->getObjects()[0].get());
+    if (cD2Pdb == nullptr)
+        return false;
+
+    return true;
+}
+
+bool DDGDat::isThisDatAreapacMapData()
+{
+    return containsMapData && objectCount == 9;
 }
