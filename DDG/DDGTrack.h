@@ -30,8 +30,7 @@ public:
     static bool possibleMatchForBuffer(DDGMemoryBuffer buffer);
     std::string getInfoAsString();
 
-    std::vector<float> getPoints();
-
+    std::vector<DDGTrackPiece> getTracks();
 private:
     std::vector<DDGTrackPiece> tracks;
 };

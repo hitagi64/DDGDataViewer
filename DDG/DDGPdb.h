@@ -4,24 +4,24 @@
 #include "DDGContent.h"
 #include "DDGCommon.h"
 
-struct DDGU163Value
+struct DDGModelTexture
 {
-    uint16_t a;
-    uint16_t b;
-    uint16_t c;
+    uint16_t textureIndex;// Refers to texture kept in a dat somewhere else
+    uint16_t b;// Unknown
+    uint16_t c;// Unknown
 };
 
 struct DDGVertexSegment
 {
     uint8_t textureID = 0;
     std::vector<DDGVector4> vertices;
-    std::vector<DDGU163Value> buf1;
+    std::vector<DDGModelTexture> buf1;
     std::vector<DDGVector2> UVs;
 };
 
 struct DDGModelSegment
 {
-    std::vector<DDGU163Value> textures;
+    std::vector<DDGModelTexture> textures;
 
     std::vector<DDGVertexSegment> vertexSegments;
 };

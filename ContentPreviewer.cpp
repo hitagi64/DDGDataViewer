@@ -55,7 +55,7 @@ void ContentPreviewer::loadModelSegment(DDGModelSegment &seg, std::vector<MeshTe
 
         if (vseg.textureID < seg.textures.size() && textureLib)
         {
-            unsigned int textureIdInDat = seg.textures[vseg.textureID].a;
+            unsigned int textureIdInDat = seg.textures[vseg.textureID].textureIndex;
             if (textureIdInDat < textureLib->getObjects().size())
             {
                 DDGTxm *cI = dynamic_cast<DDGTxm*>(textureLib->getObjects()[textureIdInDat].get());
@@ -123,7 +123,44 @@ void ContentPreviewer::displayContent(DDGContent *c)
     DDGTrack *cT = dynamic_cast<DDGTrack*>(c);
     if (cT != nullptr)
     {
-        std::vector<float> points = cT->getPoints();
+        std::vector<DDGTrackPiece> tracks = cT->getTracks();
+        std::vector<float> points;
+        for (DDGTrackPiece &track : tracks)
+        {
+            points.push_back(track.p1.x);
+            points.push_back(track.p1.y);
+            points.push_back(track.p1.z);
+
+            if (track.beginTrackPointIndex == -1)
+            {
+                points.push_back(0);
+                points.push_back(1.0f);
+                points.push_back(0);
+            }
+            else
+            {
+                points.push_back(1);
+                points.push_back(0);
+                points.push_back(1);
+            }
+
+            points.push_back(track.p2.x);
+            points.push_back(track.p2.y);
+            points.push_back(track.p2.z);
+
+            if (track.endTrackPointIndex == -1)
+            {
+                points.push_back(0);
+                points.push_back(1.0f);
+                points.push_back(0);
+            }
+            else
+            {
+                points.push_back(1);
+                points.push_back(0);
+                points.push_back(1);
+            }
+        }
 
         areaPointsModel = createModel(points.data(), points.size()*sizeof(float), points.size()/6, MODELTYPE_3F_3F, GL_POINTS);
         areaLinesModel = createModel(points.data(), points.size()*sizeof(float), points.size()/6, MODELTYPE_3F_3F, GL_LINES);

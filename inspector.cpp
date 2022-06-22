@@ -244,27 +244,27 @@ void Inspector::on_actionPdm_get_before_buffer_1_vals_triggered()
     DDGPdb *cM = dynamic_cast<DDGPdb*>(selected);
     if (cM != nullptr)
     {
-        std::vector<DDGU163Value> s1 = cM->getModelSegment1().textures;
-        std::vector<DDGU163Value> s2 = cM->getModelSegment2().textures;
-        std::vector<DDGU163Value> s3 = cM->getModelSegment3().textures;
+        std::vector<DDGModelTexture> s1 = cM->getModelSegment1().textures;
+        std::vector<DDGModelTexture> s2 = cM->getModelSegment2().textures;
+        std::vector<DDGModelTexture> s3 = cM->getModelSegment3().textures;
 
         std::string s;
         s += "Segment 1: \n";
-        for (DDGU163Value v : s1)
+        for (DDGModelTexture v : s1)
         {
-            s += std::to_string(v.a) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
+            s += std::to_string(v.textureIndex) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
         }
 
         s += "Segment 2: \n";
-        for (DDGU163Value v : s2)
+        for (DDGModelTexture v : s2)
         {
-            s += std::to_string(v.a) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
+            s += std::to_string(v.textureIndex) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
         }
 
         s += "Segment 3: \n";
-        for (DDGU163Value v : s3)
+        for (DDGModelTexture v : s3)
         {
-            s += std::to_string(v.a) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
+            s += std::to_string(v.textureIndex) + ", " + std::to_string(v.b) + ", " + std::to_string(v.c) + "\n";
         }
 
         QMessageBox messageBox;

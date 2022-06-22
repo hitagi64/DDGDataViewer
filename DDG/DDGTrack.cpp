@@ -75,44 +75,7 @@ std::string DDGTrack::getInfoAsString()
             + "\nTracks: " + std::to_string(tracks.size());
 }
 
-std::vector<float> DDGTrack::getPoints()
+std::vector<DDGTrackPiece> DDGTrack::getTracks()
 {
-    std::vector<float> points;
-    for (DDGTrackPiece &track : tracks)
-    {
-        points.push_back(track.p1.x);
-        points.push_back(track.p1.y);
-        points.push_back(track.p1.z);
-
-        if (track.beginTrackPointIndex == -1)
-        {
-            points.push_back(0);
-            points.push_back(1.0f);
-            points.push_back(0);
-        }
-        else
-        {
-            points.push_back(1);
-            points.push_back(0);
-            points.push_back(1);
-        }
-
-        points.push_back(track.p2.x);
-        points.push_back(track.p2.y);
-        points.push_back(track.p2.z);
-
-        if (track.endTrackPointIndex == -1)
-        {
-            points.push_back(0);
-            points.push_back(1.0f);
-            points.push_back(0);
-        }
-        else
-        {
-            points.push_back(1);
-            points.push_back(0);
-            points.push_back(1);
-        }
-    }
-    return points;
+    return tracks;
 }
