@@ -7,7 +7,7 @@ DDGTrack::DDGTrack()
 
 std::string DDGTrack::getType()
 {
-    return "AREA";
+    return "TRACK";
 }
 
 void DDGTrack::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
