@@ -270,7 +270,8 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
         return vertices;
 
     bool lastStripW = false;
-    unsigned int stripCount = 0;// Triangles since strip begin
+    unsigned int stripCount = 0;// Vertices since strip begin
+    bool windingOrderFlip = true;
     // A strip will start with 2 vertices where the w is not exactly 0
     for (int i = 0; i < segment.vertices.size(); i++)
     {
@@ -281,41 +282,41 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
 
         if (stripCount >= 3 && i >= 2)
         {
-            // Vertex 1
-            vertices.push_back(segment.vertices[i-2].x);
-            vertices.push_back(segment.vertices[i-2].y);
-            vertices.push_back(segment.vertices[i-2].z);
+            // Switch between counter clockwise and clockwise triangle winding.
+            // This must be done because of the data structure of triangle strip.
+            if (windingOrderFlip)
+            {
+                for (int j = 2; j >= 0; j--)
+                {
+                    vertices.push_back(segment.vertices[i-j].x);
+                    vertices.push_back(segment.vertices[i-j].y);
+                    vertices.push_back(segment.vertices[i-j].z);
 
-            vertices.push_back(segment.normals[i-2].x);
-            vertices.push_back(segment.normals[i-2].y);
-            vertices.push_back(segment.normals[i-2].z);
+                    vertices.push_back(segment.normals[i-j].x);
+                    vertices.push_back(segment.normals[i-j].y);
+                    vertices.push_back(segment.normals[i-j].z);
 
-            vertices.push_back(segment.UVs[i-2].x);
-            vertices.push_back(segment.UVs[i-2].y);
+                    vertices.push_back(segment.UVs[i-j].x);
+                    vertices.push_back(segment.UVs[i-j].y);
+                }
+            }
+            else
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    vertices.push_back(segment.vertices[i-j].x);
+                    vertices.push_back(segment.vertices[i-j].y);
+                    vertices.push_back(segment.vertices[i-j].z);
 
-            // Vertex 2
-            vertices.push_back(segment.vertices[i-1].x);
-            vertices.push_back(segment.vertices[i-1].y);
-            vertices.push_back(segment.vertices[i-1].z);
+                    vertices.push_back(segment.normals[i-j].x);
+                    vertices.push_back(segment.normals[i-j].y);
+                    vertices.push_back(segment.normals[i-j].z);
 
-            vertices.push_back(segment.normals[i-1].x);
-            vertices.push_back(segment.normals[i-1].y);
-            vertices.push_back(segment.normals[i-1].z);
-
-            vertices.push_back(segment.UVs[i-1].x);
-            vertices.push_back(segment.UVs[i-1].y);
-
-            // Vertex 3
-            vertices.push_back(segment.vertices[i].x);
-            vertices.push_back(segment.vertices[i].y);
-            vertices.push_back(segment.vertices[i].z);
-
-            vertices.push_back(segment.normals[i].x);
-            vertices.push_back(segment.normals[i].y);
-            vertices.push_back(segment.normals[i].z);
-
-            vertices.push_back(segment.UVs[i].x);
-            vertices.push_back(segment.UVs[i].y);
+                    vertices.push_back(segment.UVs[i-j].x);
+                    vertices.push_back(segment.UVs[i-j].y);
+                }
+            }
+            windingOrderFlip = !windingOrderFlip;
         }
     }
     return vertices;
