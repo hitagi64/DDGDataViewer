@@ -3,7 +3,6 @@
 
 #include "DDGContent.h"
 #include "DDGCommon.h"
-#include <QMetaEnum>
 
 enum DDGTxmPixelFormat : uint8_t
 {
