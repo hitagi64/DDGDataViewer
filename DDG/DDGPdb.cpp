@@ -281,26 +281,14 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
 
         if (stripCount >= 3 && i >= 2)
         {
-            DDGVector3 A = DDGVector3(
-                        segment.vertices[i-1].x - segment.vertices[i-2].x,
-                        segment.vertices[i-1].y - segment.vertices[i-2].y,
-                        segment.vertices[i-1].z - segment.vertices[i-2].z);
-            DDGVector3 B = DDGVector3(
-                        segment.vertices[i].x - segment.vertices[i-2].x,
-                        segment.vertices[i].y - segment.vertices[i-2].y,
-                        segment.vertices[i].z - segment.vertices[i-2].z);
-            DDGVector3 normal = DDGVector3((A.y * B.z) - (A.z * B.y),
-                                         (A.z * B.x) - (A.x * B.z),
-                                         (A.x * B.y) - (A.y * B.x));
-
             // Vertex 1
             vertices.push_back(segment.vertices[i-2].x);
             vertices.push_back(segment.vertices[i-2].y);
             vertices.push_back(segment.vertices[i-2].z);
 
-            vertices.push_back(normal.x);
-            vertices.push_back(normal.y);
-            vertices.push_back(normal.z);
+            vertices.push_back(segment.normals[i-2].x);
+            vertices.push_back(segment.normals[i-2].y);
+            vertices.push_back(segment.normals[i-2].z);
 
             vertices.push_back(segment.UVs[i-2].x);
             vertices.push_back(segment.UVs[i-2].y);
@@ -310,9 +298,9 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
             vertices.push_back(segment.vertices[i-1].y);
             vertices.push_back(segment.vertices[i-1].z);
 
-            vertices.push_back(normal.x);
-            vertices.push_back(normal.y);
-            vertices.push_back(normal.z);
+            vertices.push_back(segment.normals[i-1].x);
+            vertices.push_back(segment.normals[i-1].y);
+            vertices.push_back(segment.normals[i-1].z);
 
             vertices.push_back(segment.UVs[i-1].x);
             vertices.push_back(segment.UVs[i-1].y);
@@ -322,9 +310,9 @@ std::vector<float> DDGPdb::convertSegmentToVertexArray(const DDGVertexSegment &s
             vertices.push_back(segment.vertices[i].y);
             vertices.push_back(segment.vertices[i].z);
 
-            vertices.push_back(normal.x);
-            vertices.push_back(normal.y);
-            vertices.push_back(normal.z);
+            vertices.push_back(segment.normals[i].x);
+            vertices.push_back(segment.normals[i].y);
+            vertices.push_back(segment.normals[i].z);
 
             vertices.push_back(segment.UVs[i].x);
             vertices.push_back(segment.UVs[i].y);
