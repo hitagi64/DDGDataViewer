@@ -63,7 +63,7 @@ void ContentPreviewer::loadModelSegment(DDGModelSegment &seg, std::vector<MeshTe
                 {
                     DDGImage img = cI->convertToImage();
 
-                    m.texture = makeTexture(img.data.get(), img.width, img.height, GL_RGBA);
+                    m.texture = makeTexture(img.data.data(), img.width, img.height, GL_RGBA);
                 }
             }
         }
@@ -91,7 +91,7 @@ void ContentPreviewer::displayContent(DDGContent *c)
         if (imagePreviewTexture != 0)
             deleteTexture(imagePreviewTexture);
 
-        imagePreviewTexture = makeTexture(img.data.get(), img.width, img.height, GL_RGBA);
+        imagePreviewTexture = makeTexture(img.data.data(), img.width, img.height, GL_RGBA);
         imageAspectRatio = ((float)img.width) / img.height;
         image2DMode = true;
     }

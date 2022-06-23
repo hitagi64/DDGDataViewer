@@ -15,7 +15,7 @@ struct DDGVertexSegment
 {
     uint8_t textureID = 0;
     std::vector<DDGVector4> vertices;
-    std::vector<DDGModelTexture> buf1;
+    std::vector<DDGVector3> normals;
     std::vector<DDGVector2> UVs;
 };
 

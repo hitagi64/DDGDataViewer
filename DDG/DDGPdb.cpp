@@ -177,14 +177,17 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
         // Read the first array with 3x u16's.
         for (int i = 0; i < verticesCount; i++)
         {
-            DDGModelTexture v;
-            v.textureIndex = buffer.getU16(bufferCursor + (i*6));
+            DDGVector3 normal;
+            uint16_t x = buffer.getU16(bufferCursor + (i*6));
+            normal.x = fixedPoint412BitToFloat(x);
 
-            v.b = buffer.getU16(bufferCursor + (i*6) + 2);
+            uint16_t y = buffer.getU16(bufferCursor + (i*6) + 2);
+            normal.y = fixedPoint412BitToFloat(y);
 
-            v.c = buffer.getU16(bufferCursor + (i*6) + 4);
+            uint16_t z = buffer.getU16(bufferCursor + (i*6) + 4);
+            normal.z = fixedPoint412BitToFloat(z);
 
-            seg.vertexSegments.back().buf1.push_back(v);
+            seg.vertexSegments.back().normals.push_back(normal);
         }
 
         // Move past first array of whatever and skip the 4 bytes
