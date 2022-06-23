@@ -27,7 +27,7 @@ struct DDGImage
     int width;
     int height;
     // Data stored as RGBA32
-    std::shared_ptr<uint8_t> data;
+    std::vector<uint8_t> data;
 };
 
 class DDGTxm : public DDGContent

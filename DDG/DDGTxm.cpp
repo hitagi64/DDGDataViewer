@@ -137,7 +137,7 @@ DDGImage DDGTxm::convertToImage()
 
     image.width = imageWidth;
     image.height = imageHeight;
-    image.data = std::shared_ptr<uint8_t>(new uint8_t[image.width * image.height * 4], std::default_delete<uint8_t[]>());
+    image.data = std::vector<uint8_t>(image.width * image.height * 4, 255);
 
     unsigned int totalImageSize = (imageWidth * imageHeight * getTxmPixelFormatBitCount(imagePixelType))/8;
 
@@ -157,15 +157,15 @@ DDGImage DDGTxm::convertToImage()
                 DDGColorU8 c1 = getColorFromClutAt(firstIndex);
                 DDGColorU8 c2 = getColorFromClutAt(secondIndex);
 
-                image.data.get()[i*8]   = c1.r;
-                image.data.get()[i*8+1] = c1.g;
-                image.data.get()[i*8+2] = c1.b;
-                image.data.get()[i*8+3] = c1.a;
+                image.data[i*8]   = c1.r;
+                image.data[i*8+1] = c1.g;
+                image.data[i*8+2] = c1.b;
+                image.data[i*8+3] = c1.a;
 
-                image.data.get()[i*8+4] = c2.r;
-                image.data.get()[i*8+5] = c2.g;
-                image.data.get()[i*8+6] = c2.b;
-                image.data.get()[i*8+7] = c2.a;
+                image.data[i*8+4] = c2.r;
+                image.data[i*8+5] = c2.g;
+                image.data[i*8+6] = c2.b;
+                image.data[i*8+7] = c2.a;
 
                 i++;
             }
@@ -175,16 +175,16 @@ DDGImage DDGTxm::convertToImage()
 
                 DDGColorU8 c = getColorFromClutAt(index);
 
-                image.data.get()[i*4]   = c.r;
-                image.data.get()[i*4+1] = c.g;
-                image.data.get()[i*4+2] = c.b;
-                image.data.get()[i*4+3] = c.a;
+                image.data[i*4]   = c.r;
+                image.data[i*4+1] = c.g;
+                image.data[i*4+2] = c.b;
+                image.data[i*4+3] = c.a;
 
                 i++;
             }
             else if (imagePixelType == PSMCT32)
             {
-                image.data.get()[i] = imageData.getU8(i);
+                image.data[i] = imageData.getU8(i);
 
                 i++;
             }
