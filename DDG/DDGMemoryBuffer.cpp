@@ -18,6 +18,13 @@ DDGMemoryBuffer::DDGMemoryBuffer(size_t size)
 DDGMemoryBuffer::DDGMemoryBuffer(std::string file)
 {
     std::ifstream f(file, std::ifstream::binary);
+    if (!f.is_open())
+    {
+        bufferData = std::shared_ptr<uint8_t>(new uint8_t[0], std::default_delete<uint8_t[]>());
+        bufferSize = 0;
+        bufferOffset = 0;
+        return;
+    }
     f.seekg(0, f.end);
     unsigned long length = f.tellg();
     f.seekg(0, f.beg);
