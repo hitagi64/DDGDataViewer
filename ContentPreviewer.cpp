@@ -204,29 +204,14 @@ void ContentPreviewer::displayContent(DDGContent *c)
     {
         std::vector<DDGWorldPoint> points = cWP->getPoints();
 
-        std::vector<float> pointsAsFloats;
-        for (int i = 0; i < points.size(); i++)
-        {
-            DDGVector3 p = points[i].position;
-            pointsAsFloats.push_back(p.x);
-            pointsAsFloats.push_back(p.y);
-            pointsAsFloats.push_back(p.z);
-
-            pointsAsFloats.push_back(0);
-            pointsAsFloats.push_back(1);
-            pointsAsFloats.push_back(1);
-        }
-
-        areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);
-
-        areaPointsMode = true;
-
         for (ModelData &model : models)
             for (int i = 0; i < model.meshes.size(); i++)
                 if (model.meshes[i].data.vao != 0)
                     deleteModel(model.meshes[i].data);
 
         models.clear();
+
+        std::vector<float> pointsAsFloats;
 
         for (int i = 0; i < points.size(); i++)
         {
@@ -239,32 +224,57 @@ void ContentPreviewer::displayContent(DDGContent *c)
 
             unsigned int modelMapIndex = points[i].modelIndex;//(points[i].b >> bitSlider->value()) & 0x1ff;
 
+            int isInvalid = 0;// 0 = valid, 1 = not in model lut, 2 = not in model dat
             if (modelLUT == 0)
                 break;
             if (modelMapIndex > modelLUT->getEntries().size())
-                continue;
+            {
+                std::cerr << "LUT entry " + std::to_string(modelMapIndex) + " for model " + std::to_string(i) + " outside of LUT table." << std::endl;
+                isInvalid = 1;
+            }
 
-            unsigned int modelDatIndex = modelLUT->getEntries()[modelMapIndex];
+            if (isInvalid == 0)
+            {
+                unsigned int modelDatIndex = modelLUT->getEntries()[modelMapIndex];
 
-            if (modelLib == 0)
-                break;
-            if (modelDatIndex >= modelLib->getObjects().size())
-                continue;
+                if (modelLib == 0)
+                    break;
+                if (modelDatIndex >= modelLib->getObjects().size())
+                    isInvalid = 2;
 
-            DDGPdb *pdb = dynamic_cast<DDGPdb*>(modelLib->getObjects()[modelDatIndex].get());
-            if (pdb == nullptr)
-                continue;
-            DDGModelSegment seg1 = pdb->getModelSegment1();
-            DDGModelSegment seg2 = pdb->getModelSegment2();
-            DDGModelSegment seg3 = pdb->getModelSegment3();
+                if (isInvalid == 0)
+                {
+                    DDGPdb *pdb = dynamic_cast<DDGPdb*>(modelLib->getObjects()[modelDatIndex].get());
+                    if (pdb == nullptr)
+                        isInvalid = 3;
+                    if (isInvalid == 0)
+                    {
+                        DDGModelSegment seg1 = pdb->getModelSegment1();
+                        DDGModelSegment seg2 = pdb->getModelSegment2();
+                        DDGModelSegment seg3 = pdb->getModelSegment3();
 
-            loadModelSegment(seg1, model.meshes);
-            loadModelSegment(seg2, model.meshes);
-            loadModelSegment(seg3, model.meshes);
+                        loadModelSegment(seg1, model.meshes);
+                        loadModelSegment(seg2, model.meshes);
+                        loadModelSegment(seg3, model.meshes);
 
-            models.push_back(model);
+                        models.push_back(model);
+                    }
+                }
+            }
+
+            DDGVector3 p = points[i].position;
+            pointsAsFloats.push_back(p.x);
+            pointsAsFloats.push_back(p.y);
+            pointsAsFloats.push_back(p.z);
+
+            pointsAsFloats.push_back((isInvalid == 0) ? 0 : (isInvalid == 1));
+            pointsAsFloats.push_back((isInvalid == 0) ? 1 : (isInvalid == 2));
+            pointsAsFloats.push_back((isInvalid == 0) ? 1 : (isInvalid == 3));
         }
         modelsMode = true;
+
+        areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);
+        areaPointsMode = true;
     }
     /*DDGTest *cTest = dynamic_cast<DDGTest*>(c);
     if (cTest != nullptr)
@@ -395,7 +405,7 @@ void ContentPreviewer::paintGL()
                     sin(cameraRotV * (3.1415f/180))*direction.z(),
                     (cos(cameraRotH * (3.1415f/180))*direction.z()*cos(cameraRotV * (3.1415f/180)))
                         +(sin(cameraRotH * (3.1415f/180))*direction.x())
-                    )/(0.1f+((fastMode==0)*10));
+                    )/(0.03f+((fastMode==0)*12));
 
         if (flyMode)
             view.lookAt(position, position + QVector3D(
@@ -636,14 +646,14 @@ std::vector<float> ContentPreviewer::generatePlaneUV()
          0.0f, 0.0f,
 
 
+        1.0f, 1.0f, 0.0f,// Top right
+        0.0f, 0.0f,
+
+        1.0f, -1.0f, 0.0f,// Bottom right
+        0.0f, 1.0f,
+
         -1.0f, -1.0f, 0.0f,// Bottom left
          1.0f, 1.0f,
-
-         1.0f, -1.0f, 0.0f,// Bottom right
-         0.0f, 1.0f,
-
-         1.0f, 1.0f, 0.0f,// Top right
-         0.0f, 0.0f,
     };
 
     return std::vector<float>(std::begin(vertices), std::end(vertices));

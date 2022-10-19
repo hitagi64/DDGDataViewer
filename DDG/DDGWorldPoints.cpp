@@ -37,7 +37,7 @@ void DDGWorldPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
         DDGWorldPoint wp;
         wp.position = DDGVector3(x.f, y.f, z.f);
-        wp.modelIndex = buffer.getU16(bufferCursor + 20);
+        wp.modelIndex = buffer.getU16(bufferCursor + 20) & 16383;
         wp.rotation = r.f;
         points.push_back(wp);
 

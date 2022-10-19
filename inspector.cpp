@@ -60,6 +60,7 @@ void Inspector::loadNewFile()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setOption(dialog.DontUseNativeDialog, true);
     QStringList fileNames;
     if (dialog.exec())
         fileNames = dialog.selectedFiles();
