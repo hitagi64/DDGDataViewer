@@ -30,7 +30,14 @@ DDGMemoryBuffer DDGMapModelLUT::saveAsMemoryBuffer()
 
 bool DDGMapModelLUT::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 {
-    return false;
+    int16_t itemCount = buffer.getU16(0);
+    if (itemCount*2 >= buffer.getSize())
+        return false;
+    if (itemCount*2 < buffer.getSize()-32)
+        return false;
+    if (itemCount > 20000)
+        return false;
+    return true;
 }
 
 std::string DDGMapModelLUT::getInfoAsString()

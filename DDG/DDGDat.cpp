@@ -57,7 +57,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         containsMapData = true;
     }
     else
-        throw std::string("Dat file header magic sequence not found.");
+        throw std::string("Dat file header not found.");
 
     objectCount = buffer.getU32(baseDatOffset + 4);
     for (int i = 0; i < objectCount; i++)
@@ -97,7 +97,11 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         }
         else
         {
-            if (i == 2 && isThisDatAreapac())
+            bool match;
+            std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
+            objects.push_back(obj);
+
+            /*if (i == 2 && isThisDatAreapac())
             {
                 std::shared_ptr<DDGContent> obj = std::make_shared<DDGMapModelLUT>();
                 obj->loadFromMemoryBuffer(subBuf);
@@ -108,7 +112,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
                 bool match;
                 std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
                 objects.push_back(obj);
-            }
+            }*/
         }
     }
 }
@@ -146,6 +150,8 @@ std::vector<std::shared_ptr<DDGContent> > DDGDat::getObjects()
 
 std::shared_ptr<DDGContent> DDGDat::findAndLoadContentFromBuffer(DDGMemoryBuffer buffer, bool &foundMatch)
 {
+    // The order of this list is based on how accurate the type detection is.
+
     foundMatch = true;
     if (DDGDat::possibleMatchForBuffer(buffer))
     {
@@ -162,6 +168,12 @@ std::shared_ptr<DDGContent> DDGDat::findAndLoadContentFromBuffer(DDGMemoryBuffer
     else if (DDGPdb::possibleMatchForBuffer(buffer))
     {
         std::shared_ptr<DDGContent> dat = std::make_shared<DDGPdb>();
+        dat->loadFromMemoryBuffer(buffer);
+        return dat;
+    }
+    else if (DDGMapModelLUT::possibleMatchForBuffer(buffer))
+    {
+        std::shared_ptr<DDGContent> dat = std::make_shared<DDGMapModelLUT>();
         dat->loadFromMemoryBuffer(buffer);
         return dat;
     }
