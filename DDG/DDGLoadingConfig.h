@@ -6,7 +6,6 @@ class DDGLoadingConfig
 {
 public:
     bool useFixedPoint = false;
-
 };
 
 #endif // DDGLOADINGCONFIG_H

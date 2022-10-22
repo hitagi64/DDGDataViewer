@@ -51,14 +51,9 @@ private:
     uint16_t imageWidth;
     uint16_t imageHeight;
 
-    uint16_t misc1;
-
     DDGTxmPixelFormat clutPixelType;
-    uint16_t misc2;
     uint16_t clutWidth;
     uint16_t clutHeight;
-
-    uint16_t misc3;
 
     DDGMemoryBuffer clutData;
     DDGMemoryBuffer imageData;

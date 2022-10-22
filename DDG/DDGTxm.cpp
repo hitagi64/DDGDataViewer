@@ -18,16 +18,11 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         buffer.getU8(1) == 'X' &&
         buffer.getU8(2) == 'D')
     {
-        // Not present in DDG Shinkansen it seems.
-        misc1 = 0;
-        misc2 = 0;
-        misc3 = 0;
-
         clutWidth = buffer.getU8(3);
         clutHeight = buffer.getU8(4);
         clutPixelType = (DDGTxmPixelFormat)buffer.getU8(5);
 
-        imagePixelType = (DDGTxmPixelFormat)0x13;
+        imagePixelType = PSMT8;
         imageWidth = buffer.getU16(6);
         imageHeight = buffer.getU16(8);
 
@@ -36,22 +31,14 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
     }
     else
     {
-        misc1 = buffer.getU16(0x6);
         imagePixelType = (DDGTxmPixelFormat)buffer.getU8(0x0);
         imageWidth = buffer.getU16(0x2);
         imageHeight = buffer.getU16(0x4);
 
-        misc2 = buffer.getU8(0x9);
-
         clutPixelType = (DDGTxmPixelFormat)buffer.getU8(0x8);
         clutWidth = buffer.getU16(0x0A);
         clutHeight = buffer.getU16(0x0C);
-
-        misc3 = buffer.getU16(0xE);
     }
-
-    // I am not sure but misc1 and misc3 might be texture id's.
-    // This because they are referenced by pdb models.
 
     unsigned int totalClutSize = (clutWidth * clutHeight * getTxmPixelFormatBitCount(clutPixelType))/8;
     unsigned int totalImageSize = (imageWidth * imageHeight * getTxmPixelFormatBitCount(imagePixelType))/8;
@@ -127,8 +114,7 @@ std::string DDGTxm::getInfoAsString()
             + "\nImage Height: " + std::to_string(imageHeight)
             + "\nClut Pixel Format: " + txmPixelFormatAsString(clutPixelType)
             + "\nClut Width: " + std::to_string(clutWidth)
-            + "\nClut Height: " + std::to_string(clutHeight)
-            + "\nMiscs: " + std::to_string(misc1) + ", " + std::to_string(misc2) + ", " + std::to_string(misc3);
+            + "\nClut Height: " + std::to_string(clutHeight);
 }
 
 DDGImage DDGTxm::convertToImage()
