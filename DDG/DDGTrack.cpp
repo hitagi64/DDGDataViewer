@@ -1,6 +1,6 @@
 #include "DDGTrack.h"
 
-DDGTrack::DDGTrack()
+DDGTrack::DDGTrack(DDGLoadingConfig config) : DDGContent(config)
 {
 
 }
@@ -40,8 +40,20 @@ void DDGTrack::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         z2.i = buffer.getU32(bufferCursor + 20);
 
         DDGTrackPiece track;
-        track.p1 = DDGVector3(x.f, y.f, z.f);
-        track.p2 = DDGVector3(x2.f, y2.f, z2.f);
+        if (!config.useFixedPoint)
+        {
+            track.p1 = DDGVector3(x.f, y.f, z.f);
+            track.p2 = DDGVector3(x2.f, y2.f, z2.f);
+        }
+        else
+        {
+            track.p1 = DDGVector3(fixedPoint2610BitToFloat(x.i),
+                                  fixedPoint2610BitToFloat(y.i),
+                                  fixedPoint2610BitToFloat(z.i));
+            track.p2 = DDGVector3(fixedPoint2610BitToFloat(x2.i),
+                                  fixedPoint2610BitToFloat(y2.i),
+                                  fixedPoint2610BitToFloat(z2.i));
+        }
 
         track.nextTrack = buffer.getU32(bufferCursor + 24);
         track.previousTrack = buffer.getU32(bufferCursor + 32);

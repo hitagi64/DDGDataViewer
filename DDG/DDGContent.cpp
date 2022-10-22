@@ -1,8 +1,13 @@
 #include "DDGContent.h"
 
+DDGContent::DDGContent(DDGLoadingConfig config)
+{
+    this->config = config;
+}
+
 std::string DDGContent::getType()
 {
-    return "Content";
+    return "CONTENT";
 }
 
 void DDGContent::loadFromMemoryBuffer(DDGMemoryBuffer buffer)

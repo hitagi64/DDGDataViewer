@@ -28,9 +28,10 @@ set(PROJECT_SOURCES
         DDG/DDGTrackPoints.h DDG/DDGTrackPoints.cpp
         DDG/DDGWorldPoints.h DDG/DDGWorldPoints.cpp
         DDG/DDGMapModelLUT.h DDG/DDGMapModelLUT.cpp
-        DDG/DDGCommon.h
+        DDG/DDGCommon.h DDG/DDGCommon.cpp
         ContentTreeItem.h ContentTreeItem.cpp
         ContentPreviewer.h ContentPreviewer.cpp
+        DDG/DDGLoadingConfig.h DDG/DDGLoadingConfig.cpp
         Res.qrc
 )
 

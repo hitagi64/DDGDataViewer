@@ -1,6 +1,6 @@
 #include "DDGTrackPoints.h"
 
-DDGTrackPoints::DDGTrackPoints()
+DDGTrackPoints::DDGTrackPoints(DDGLoadingConfig config) : DDGContent(config)
 {
 
 }
@@ -33,7 +33,12 @@ void DDGTrackPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         unsigned int pointType = buffer.getU32(bufferCursor + 12);
 
         DDGTrackPoint point;
-        point.position = DDGVector3(x.f, y.f, z.f);
+        if (!config.useFixedPoint)
+            point.position = DDGVector3(x.f, y.f, z.f);
+        else
+            point.position = DDGVector3(fixedPoint2610BitToFloat(x.i),
+                                        fixedPoint2610BitToFloat(y.i),
+                                        fixedPoint2610BitToFloat(z.i));
         point.isOverheadWire = ((pointType>>29)&1) == 1;
 
         points.push_back(point);

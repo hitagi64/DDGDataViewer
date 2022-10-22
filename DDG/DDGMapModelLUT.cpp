@@ -1,6 +1,6 @@
 #include "DDGMapModelLUT.h"
 
-DDGMapModelLUT::DDGMapModelLUT()
+DDGMapModelLUT::DDGMapModelLUT(DDGLoadingConfig config) : DDGContent(config)
 {
 
 }
@@ -31,11 +31,13 @@ DDGMemoryBuffer DDGMapModelLUT::saveAsMemoryBuffer()
 bool DDGMapModelLUT::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 {
     int16_t itemCount = buffer.getU16(0);
-    if (itemCount*2 >= buffer.getSize())
+    if (itemCount*2 >= buffer.getSize()-2)
         return false;
-    if (itemCount*2 < buffer.getSize()-32)
+    if (itemCount*2 < buffer.getSize()-34)
         return false;
     if (itemCount > 20000)
+        return false;
+    if (itemCount == 0)
         return false;
     return true;
 }

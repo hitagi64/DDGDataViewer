@@ -81,4 +81,7 @@ struct DDGVector2
     float y;
 };
 
+// Just a guess for now
+float fixedPoint2610BitToFloat(uint32_t v);
+
 #endif // DDGCOMMON_H

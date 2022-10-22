@@ -6,7 +6,7 @@
 #include "DDGWorldPoints.h"
 #include "DDGMapModelLUT.h"
 
-DDGDat::DDGDat()
+DDGDat::DDGDat(DDGLoadingConfig config) : DDGContent(config)
 {
     containsMapData = false;
 }
@@ -16,7 +16,7 @@ std::string DDGDat::getType()
     if (!containsMapData)
         return "DAT";
     else
-        return "DAT (mapdata)";
+        return "DAT (MAPDATA)";
 }
 
 void DDGDat::loadFromFile(std::string filename)
@@ -72,33 +72,37 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         {
             if (i == 0)
             {
-                std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrack>();
+                std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrack>(config);
                 obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
             else if (i == 1 || i == 2)
             {
-                std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrackPoints>();
+                std::shared_ptr<DDGContent> obj = std::make_shared<DDGTrackPoints>(config);
                 obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
             else if (i == 7)
             {
-                std::shared_ptr<DDGContent> obj = std::make_shared<DDGWorldPoints>();
+                std::shared_ptr<DDGContent> obj = std::make_shared<DDGWorldPoints>(config);
                 obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
             else
             {
                 bool match;
-                std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
+                std::shared_ptr<DDGContent> obj = findAndCreateFromBuffer(config, subBuf, match);
+                if (match)
+                    obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
         }
         else
         {
             bool match;
-            std::shared_ptr<DDGContent> obj = findAndLoadContentFromBuffer(subBuf, match);
+            std::shared_ptr<DDGContent> obj = findAndCreateFromBuffer(config, subBuf, match);
+            if (match)
+                obj->loadFromMemoryBuffer(subBuf);
             objects.push_back(obj);
 
             /*if (i == 2 && isThisDatAreapac())
@@ -148,40 +152,22 @@ std::vector<std::shared_ptr<DDGContent> > DDGDat::getObjects()
     return objects;
 }
 
-std::shared_ptr<DDGContent> DDGDat::findAndLoadContentFromBuffer(DDGMemoryBuffer buffer, bool &foundMatch)
+std::shared_ptr<DDGContent> DDGDat::findAndCreateFromBuffer(DDGLoadingConfig config, DDGMemoryBuffer buffer, bool &foundMatch)
 {
     // The order of this list is based on how accurate the type detection is.
 
     foundMatch = true;
     if (DDGDat::possibleMatchForBuffer(buffer))
-    {
-        std::shared_ptr<DDGContent> dat = std::make_shared<DDGDat>();
-        dat->loadFromMemoryBuffer(buffer);
-        return dat;
-    }
+        return std::make_shared<DDGDat>(config);
     else if (DDGTxm::possibleMatchForBuffer(buffer))
-    {
-        std::shared_ptr<DDGContent> dat = std::make_shared<DDGTxm>();
-        dat->loadFromMemoryBuffer(buffer);
-        return dat;
-    }
+        return std::make_shared<DDGTxm>(config);
     else if (DDGPdb::possibleMatchForBuffer(buffer))
-    {
-        std::shared_ptr<DDGContent> dat = std::make_shared<DDGPdb>();
-        dat->loadFromMemoryBuffer(buffer);
-        return dat;
-    }
+        return std::make_shared<DDGPdb>(config);
     else if (DDGMapModelLUT::possibleMatchForBuffer(buffer))
-    {
-        std::shared_ptr<DDGContent> dat = std::make_shared<DDGMapModelLUT>();
-        dat->loadFromMemoryBuffer(buffer);
-        return dat;
-    }
-    else
-    {
-        foundMatch = false;
-        return std::make_shared<DDGContent>();
-    }
+        return std::make_shared<DDGMapModelLUT>(config);
+
+    foundMatch = false;
+    return std::make_shared<DDGContent>(config);
 }
 
 bool DDGDat::isThisDatAreapac()

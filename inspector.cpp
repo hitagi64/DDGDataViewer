@@ -78,16 +78,16 @@ void Inspector::loadNewFile()
 bool Inspector::parseFile(std::string filename)
 {
     bool success = false;
-    std::shared_ptr<DDGContent> dat = std::make_shared<DDGDat>();
+    std::shared_ptr<DDGContent> dat;
     try {
         DDGMemoryBuffer buffer(filename);
+        DDGLoadingConfig config;
+        config.useFixedPoint = ui->actionLoad_Fixed_Point->isChecked();
         bool match = false;
-        dat = DDGDat::findAndLoadContentFromBuffer(buffer, match);
+        dat = DDGDat::findAndCreateFromBuffer(config, buffer, match);
         if (!match)
-        {
-            dat = std::make_shared<DDGDat>();
-            dat->loadFromMemoryBuffer(buffer);
-        }
+            dat = std::make_shared<DDGDat>(config);
+        dat->loadFromMemoryBuffer(buffer);
         dats.push_back(dat);
         success = true;
     }  catch (std::string e) {
@@ -171,7 +171,9 @@ void Inspector::on_actionDat_triggered()
 
     try {
         DDGMemoryBuffer buffer(fileNames[0].toStdString());
-        std::shared_ptr<DDGContent> c = std::make_shared<DDGDat>();
+        DDGLoadingConfig config;
+        config.useFixedPoint = ui->actionLoad_Fixed_Point->isChecked();
+        std::shared_ptr<DDGContent> c = std::make_shared<DDGDat>(config);
         c->loadFromMemoryBuffer(buffer);
         dats.push_back(c);
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
@@ -198,7 +200,9 @@ void Inspector::on_actionTxm_triggered()
 
     try {
         DDGMemoryBuffer buffer(fileNames[0].toStdString());
-        std::shared_ptr<DDGContent> c = std::make_shared<DDGTxm>();
+        DDGLoadingConfig config;
+        config.useFixedPoint = ui->actionLoad_Fixed_Point->isChecked();
+        std::shared_ptr<DDGContent> c = std::make_shared<DDGTxm>(config);
         c->loadFromMemoryBuffer(buffer);
         dats.push_back(c);
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
@@ -225,7 +229,9 @@ void Inspector::on_actionPdb_triggered()
 
     try {
         DDGMemoryBuffer buffer(fileNames[0].toStdString());
-        std::shared_ptr<DDGContent> c = std::make_shared<DDGPdb>();
+        DDGLoadingConfig config;
+        config.useFixedPoint = ui->actionLoad_Fixed_Point->isChecked();
+        std::shared_ptr<DDGContent> c = std::make_shared<DDGPdb>(config);
         c->loadFromMemoryBuffer(buffer);
         dats.push_back(c);
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());

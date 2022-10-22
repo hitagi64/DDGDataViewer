@@ -22,7 +22,7 @@ struct DDGTrackPiece
 class DDGTrack : public DDGContent
 {
 public:
-    DDGTrack();
+    DDGTrack(DDGLoadingConfig config);
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);

@@ -149,12 +149,13 @@
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
-     <string>Debug</string>
+     <string>Options</string>
     </property>
     <addaction name="actionPdm_get_before_buffer_1_vals"/>
     <addaction name="actionSet_DAT_as_active_texture_lib"/>
     <addaction name="actionSet_DAT_as_active_model_lib"/>
     <addaction name="actionSet_MAPMODELLUT_as_active"/>
+    <addaction name="actionLoad_Fixed_Point"/>
    </widget>
    <widget class="QMenu" name="menuPreviewer">
     <property name="title">
@@ -224,6 +225,14 @@
    </property>
    <property name="toolTip">
     <string>Set MAPMODELLUT as active</string>
+   </property>
+  </action>
+  <action name="actionLoad_Fixed_Point">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Load Fixed Point</string>
    </property>
   </action>
  </widget>

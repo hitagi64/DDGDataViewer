@@ -1,6 +1,6 @@
 #include "DDGPdb.h"
 
-DDGPdb::DDGPdb()
+DDGPdb::DDGPdb(DDGLoadingConfig config) : DDGContent(config)
 {
 
 }
@@ -174,7 +174,7 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
         // Move past vertices and skip the 4 bytes of data after it.
         bufferCursor += (verticesCount * 16) + 4;
 
-        // Read the first array with 3x u16's.
+        // Read the normals, these are in 12 bit fixed point in i16 format.
         for (int i = 0; i < verticesCount; i++)
         {
             DDGVector3 normal;
@@ -190,8 +190,7 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
             seg.vertexSegments.back().normals.push_back(normal);
         }
 
-        // Move past first array of whatever and skip the 4 bytes
-        //  of data after it again.
+        // Move past the normals and skip 4 bytes after it.
         bufferCursor += (verticesCount * 6) + 4;
 
         // Read the array with UV's.
@@ -208,7 +207,7 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
             seg.vertexSegments.back().UVs.push_back(v);
         }
 
-        // Move past second array of uv's.
+        // Move past array of uv's.
         bufferCursor += (verticesCount * 4);
 
         // Files seem to 16 align here again
@@ -221,13 +220,13 @@ DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)
 
 float DDGPdb::fixedPoint412BitToFloat(uint16_t v)
 {
-    int16_t resA = (v >> 12) & 15;
-    //resA += resA & 32768;
-
-    uint16_t resB = v & 4095;
-    float resBF = resB / 4096.f;
-
-    return ((float)resA) + resBF;
+    int16_t vs = v;
+    bool neg = vs < 0;
+    if (neg)
+        vs *= -1;
+    float frac = vs & 4095;
+    frac /= 4096;
+    return ((vs >> 12)+frac) * (neg?-1.f:1.f);
 }
 
 bool DDGPdb::possibleMatchForBuffer(DDGMemoryBuffer buffer)

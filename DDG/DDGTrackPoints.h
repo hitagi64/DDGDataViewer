@@ -12,7 +12,7 @@ struct DDGTrackPoint
 class DDGTrackPoints : public DDGContent
 {
 public:
-    DDGTrackPoints();
+    DDGTrackPoints(DDGLoadingConfig config);
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);

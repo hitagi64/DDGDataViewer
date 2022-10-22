@@ -6,7 +6,7 @@
 class DDGDat : public DDGContent
 {
 public:
-    DDGDat();
+    DDGDat(DDGLoadingConfig config);
 
     virtual std::string getType();
 
@@ -22,7 +22,7 @@ public:
 
     std::vector<std::shared_ptr<DDGContent>> getObjects();
 
-    static std::shared_ptr<DDGContent> findAndLoadContentFromBuffer(DDGMemoryBuffer buffer, bool &foundMatch);
+    static std::shared_ptr<DDGContent> findAndCreateFromBuffer(DDGLoadingConfig config, DDGMemoryBuffer buffer, bool &foundMatch);
 private:
     bool isThisDatAreapac();
     bool isThisDatAreapacMapData();

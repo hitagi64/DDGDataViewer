@@ -29,7 +29,7 @@ struct DDGModelSegment
 class DDGPdb : public DDGContent
 {
 public:
-    DDGPdb();
+    DDGPdb(DDGLoadingConfig config);
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);

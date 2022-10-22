@@ -6,7 +6,7 @@
 class DDGMapModelLUT : public DDGContent
 {
 public:
-    DDGMapModelLUT();
+    DDGMapModelLUT(DDGLoadingConfig config);
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <map>
 
-DDGWorldPoints::DDGWorldPoints()
+DDGWorldPoints::DDGWorldPoints(DDGLoadingConfig config) : DDGContent(config)
 {
 
 }
@@ -36,7 +36,12 @@ void DDGWorldPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         r.i = buffer.getU32(bufferCursor + 16);// Rotation as radians
 
         DDGWorldPoint wp;
-        wp.position = DDGVector3(x.f, y.f, z.f);
+        if (!config.useFixedPoint)
+            wp.position = DDGVector3(x.f, y.f, z.f);
+        else
+            wp.position = DDGVector3(fixedPoint2610BitToFloat(x.i),
+                                     fixedPoint2610BitToFloat(y.i),
+                                     fixedPoint2610BitToFloat(z.i));
         wp.modelIndex = buffer.getU16(bufferCursor + 20) & 16383;
         wp.rotation = r.f;
         points.push_back(wp);

@@ -13,7 +13,7 @@ struct DDGWorldPoint
 class DDGWorldPoints : public DDGContent
 {
 public:
-    DDGWorldPoints();
+    DDGWorldPoints(DDGLoadingConfig config);
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);

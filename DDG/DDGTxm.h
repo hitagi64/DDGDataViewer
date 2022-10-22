@@ -32,7 +32,7 @@ struct DDGImage
 class DDGTxm : public DDGContent
 {
 public:
-    DDGTxm();
+    DDGTxm(DDGLoadingConfig config);
 
     std::string getType();
     void loadFromMemoryBuffer(DDGMemoryBuffer buffer);
