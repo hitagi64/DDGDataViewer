@@ -21,7 +21,10 @@ public:
     uint32_t getU32(unsigned long offset);
     void setU32(uint32_t b, unsigned long offset);
 
+    void saveToFile(std::string filename);
+
     size_t getSize();
+    uint8_t *getPtr();
 
 private:
     std::shared_ptr<uint8_t> bufferData;

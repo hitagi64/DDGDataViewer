@@ -20,6 +20,7 @@ Inspector::Inspector(QWidget *parent)
     setAcceptDrops(true);
 
     ui->ItemView->setColumnWidth(0, 200);
+    ui->actionKeep_Loaded_Data->setChecked(true);
 
     selected = 0;
 }
@@ -83,6 +84,7 @@ bool Inspector::parseFile(std::string filename)
         DDGMemoryBuffer buffer(filename);
         DDGLoadingConfig config;
         config.useFixedPoint = ui->actionLoad_Fixed_Point->isChecked();
+        config.keepLoadedData = ui->actionKeep_Loaded_Data->isChecked();
         bool match = false;
         dat = DDGDat::findAndCreateFromBuffer(config, buffer, match);
         if (!match)
@@ -90,9 +92,9 @@ bool Inspector::parseFile(std::string filename)
         dat->loadFromMemoryBuffer(buffer);
         dats.push_back(dat);
         success = true;
-    }  catch (std::string e) {
+    }  catch (std::runtime_error e) {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","An error occured while loading file: " + QString::fromStdString(e));
+        messageBox.critical(0,"Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
     }
     return success;
 }
@@ -154,6 +156,7 @@ void Inspector::on_ItemView_currentItemChanged(QTreeWidgetItem *current, QTreeWi
     ui->previewer->displayContent(cItem->content);
 
     selected = cItem->content;
+    selectedName = cItem->text(1);
 }
 
 void Inspector::on_actionDat_triggered()
@@ -177,9 +180,9 @@ void Inspector::on_actionDat_triggered()
         c->loadFromMemoryBuffer(buffer);
         dats.push_back(c);
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
-    }  catch (std::string e) {
+    }  catch (std::runtime_error e) {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","An error occured while loading file: " + QString::fromStdString(e));
+        messageBox.critical(0,"Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
     }
 
     renderDat();
@@ -206,9 +209,9 @@ void Inspector::on_actionTxm_triggered()
         c->loadFromMemoryBuffer(buffer);
         dats.push_back(c);
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
-    }  catch (std::string e) {
+    }  catch (std::runtime_error e) {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","An error occured while loading file: " + QString::fromStdString(e));
+        messageBox.critical(0,"Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
     }
 
     renderDat();
@@ -235,9 +238,9 @@ void Inspector::on_actionPdb_triggered()
         c->loadFromMemoryBuffer(buffer);
         dats.push_back(c);
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
-    }  catch (std::string e) {
+    }  catch (std::runtime_error e) {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","An error occured while loading file: " + QString::fromStdString(e));
+        messageBox.critical(0,"Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
     }
 
     renderDat();
@@ -311,6 +314,49 @@ void Inspector::on_actionSet_MAPMODELLUT_as_active_triggered()
     if (cT != nullptr)
     {
         ui->previewer->modelLUT = cT;
+    }
+}
+
+
+void Inspector::on_actionSave_DAT_triggered()
+{
+    DDGDat *cD = dynamic_cast<DDGDat*>(selected);
+    if (cD != nullptr)
+    {
+        QString origFileName = selectedName;
+        if (origFileName == "")
+            origFileName = "out.dat";
+        std::string saveFileName =
+                QFileDialog::getSaveFileName(
+                    this,
+                    "Save Dat file",
+                    origFileName,
+                    ".dat",
+                    0,
+                    QFileDialog::DontUseNativeDialog
+                ).toStdString();
+        try {
+            cD->saveToFile(saveFileName);
+        }  catch (std::runtime_error e) {
+            QMessageBox messageBox;
+            messageBox.critical(
+                        0,
+                        "Error",
+                        QString::fromStdString(
+                            std::string("An error occured while saving a file: ")
+                            + e.what()
+                            )
+                        );
+        }
+    }
+    else
+    {
+        QMessageBox messageBox;
+        messageBox.critical(
+                    0,
+                    "Error",
+                    "No item selected or the selected item is not a Dat."
+                    );
     }
 }
 

@@ -12,6 +12,9 @@ std::string DDGTrackPoints::getType()
 
 void DDGTrackPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
+    if (config.keepLoadedData)
+        savedData = buffer;
+
     unsigned int bufferCursor = 0;
 
     typedef union {
@@ -49,8 +52,9 @@ void DDGTrackPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGTrackPoints::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGTrackPoints to Memory Buffer not yet possible.");
-    return DDGMemoryBuffer(0);
+    if (config.keepLoadedData)
+        return savedData;
+    throw std::runtime_error("Saving DDGTrackPoints to Memory Buffer not yet possible.");
 }
 
 bool DDGTrackPoints::possibleMatchForBuffer(DDGMemoryBuffer buffer)

@@ -12,6 +12,9 @@ std::string DDGMapModelLUT::getType()
 
 void DDGMapModelLUT::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
+    if (config.keepLoadedData)
+        savedData = buffer;
+
     int16_t itemCount = buffer.getU16(0);
     if (itemCount < 0)
         return;
@@ -24,8 +27,9 @@ void DDGMapModelLUT::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGMapModelLUT::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGMapModelLUT to Memory Buffer not yet possible.");
-    return DDGMemoryBuffer(0);
+    if (config.keepLoadedData)
+        return savedData;
+    throw std::runtime_error("Saving DDGMapModelLUT to Memory Buffer not yet possible.");
 }
 
 bool DDGMapModelLUT::possibleMatchForBuffer(DDGMemoryBuffer buffer)

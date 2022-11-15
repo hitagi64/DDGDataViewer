@@ -12,6 +12,9 @@ std::string DDGTxm::getType()
 
 void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
+    if (config.keepLoadedData)
+        savedData = buffer;
+
     int headerSize = 16;
 
     if (buffer.getU8(0) == 'T' &&
@@ -59,8 +62,9 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGTxm::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGTxm to Memory Buffer not yet possible.");
-    return DDGMemoryBuffer(0);
+    if (config.keepLoadedData)
+        return savedData;
+    throw std::runtime_error("Saving DDGTxm to Memory Buffer not yet possible.");
 }
 
 bool DDGTxm::possibleMatchForBuffer(DDGMemoryBuffer buffer)
@@ -175,11 +179,11 @@ DDGImage DDGTxm::convertToImage()
                 i++;
             }
             else
-                throw std::string("Cannot convert to image, pixel format " + txmPixelFormatAsString(imagePixelType) + " unspported.");
+                throw std::runtime_error("Cannot convert to image, pixel format " + txmPixelFormatAsString(imagePixelType) + " unspported.");
         }
     }
     else
-        throw std::string("Cannot convert to image, bpp was 0.");
+        throw std::runtime_error("Cannot convert to image, bpp was 0.");
 
 
     return image;

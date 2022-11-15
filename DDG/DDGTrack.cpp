@@ -12,6 +12,9 @@ std::string DDGTrack::getType()
 
 void DDGTrack::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
+    if (config.keepLoadedData)
+        savedData = buffer;
+
     unsigned int bufferCursor = 0;
 
     typedef union {
@@ -72,8 +75,9 @@ void DDGTrack::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGTrack::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGTrack to Memory Buffer not yet possible.");
-    return DDGMemoryBuffer(0);
+    if (config.keepLoadedData)
+        return savedData;
+    throw std::runtime_error("Saving DDGTrack to Memory Buffer not yet possible.");
 }
 
 bool DDGTrack::possibleMatchForBuffer(DDGMemoryBuffer buffer)

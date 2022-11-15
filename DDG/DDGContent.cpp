@@ -12,13 +12,15 @@ std::string DDGContent::getType()
 
 void DDGContent::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
-    throw std::string("Can't load a DDGContent because its a base type.");
+    if (config.keepLoadedData)
+        savedData = buffer;
 }
 
 DDGMemoryBuffer DDGContent::saveAsMemoryBuffer()
 {
-    throw std::string("Can't save a DDGContent because its a base type.");
-    return DDGMemoryBuffer(0);
+    if (config.keepLoadedData)
+        return savedData;
+    throw std::runtime_error("Can't save a DDGContent because its a base type.");
 }
 
 bool DDGContent::possibleMatchForBuffer(DDGMemoryBuffer buffer)
@@ -28,5 +30,8 @@ bool DDGContent::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 
 std::string DDGContent::getInfoAsString()
 {
-    return "Type: " + getType();
+    std::string info = "Type: " + getType();
+    if (getType() == "CONTENT")
+        info += "\nSize: " + std::to_string(savedData.getSize());
+    return info;
 }

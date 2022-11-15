@@ -48,13 +48,12 @@ DDGMemoryBuffer::DDGMemoryBuffer(std::shared_ptr<uint8_t> bufferData, size_t buf
 DDGMemoryBuffer DDGMemoryBuffer::getPortion(unsigned long begin, unsigned long end)
 {
     if (begin > end)
-        throw std::string("Buffer portion begin can't be higher than it's end.");
+        throw std::runtime_error("Buffer portion begin can't be higher than it's end.");
     if (begin < 0 || begin >= bufferSize)
-        throw std::string("Buffer not big enough to get portion of begin: " + std::to_string(begin) + " end: " + std::to_string(end));
+        throw std::runtime_error("Buffer not big enough to get portion of begin: " + std::to_string(begin) + " end: " + std::to_string(end));
     if (end < 0 || end > bufferSize)
-        throw std::string("Buffer not big enough to get portion of begin: " + std::to_string(begin) + " end: " + std::to_string(end));
+        throw std::runtime_error("Buffer not big enough to get portion of begin: " + std::to_string(begin) + " end: " + std::to_string(end));
     return DDGMemoryBuffer(bufferData, end - begin, bufferOffset + begin);
-
 }
 
 uint8_t DDGMemoryBuffer::getU8(unsigned long offset)
@@ -98,7 +97,24 @@ void DDGMemoryBuffer::setU32(uint32_t b, unsigned long offset)
     setU8(offset+3, (b >> 24) & 0xff);
 }
 
+void DDGMemoryBuffer::saveToFile(std::string filename)
+{
+    std::ofstream outfile(filename, std::ios::binary);
+    if (getPtr() == 0)
+        throw std::runtime_error("DDGMemoryBuffer could not be saved.");
+    if (getSize() != 0)
+        outfile.write((char*)getPtr(), getSize());
+    outfile.close();
+}
+
 size_t DDGMemoryBuffer::getSize()
 {
     return bufferSize;
+}
+
+uint8_t *DDGMemoryBuffer::getPtr()
+{
+    if (bufferOffset >= getSize())
+        return 0;
+    return &bufferData.get()[bufferOffset];
 }

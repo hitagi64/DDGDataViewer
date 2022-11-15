@@ -14,6 +14,9 @@ std::string DDGWorldPoints::getType()
 
 void DDGWorldPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
+    if (config.keepLoadedData)
+        savedData = buffer;
+
     unsigned int bufferCursor = 0;
 
     typedef union {
@@ -52,8 +55,9 @@ void DDGWorldPoints::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGWorldPoints::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGWorldPoints to Memory Buffer not yet possible.");
-    return DDGMemoryBuffer(0);
+    if (config.keepLoadedData)
+        return savedData;
+    throw std::runtime_error("Saving DDGWorldPoints to Memory Buffer not yet possible.");
 }
 
 bool DDGWorldPoints::possibleMatchForBuffer(DDGMemoryBuffer buffer)

@@ -12,6 +12,9 @@ std::string DDGPdb::getType()
 
 void DDGPdb::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
+    if (config.keepLoadedData)
+        savedData = buffer;
+
     // Header is 48 bytes long
 
     // First 8 bytes are unknown
@@ -41,7 +44,7 @@ void DDGPdb::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
     } i2f;
 
     if (boundsVerticesSize % 16 != 0)
-        throw std::string("Invalid size for vertices1.");
+        throw std::runtime_error("Invalid size for bounds vertices.");
 
     for (int i = 0; i < boundsVerticesSize/16; i++)
     {
@@ -60,7 +63,7 @@ void DDGPdb::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         boundsVertices.push_back({x.f, y.f, z.f, w.f});
     }
 
-    // Read the vertex data from the 3 vertex buffers specified in the header
+    // Read the vertex data from the 3 vertex buffers specified in the header.
     if (vertexDataSize1 > 0)
         segment1 = readModelSegment(
                     buffer.getPortion(
@@ -83,8 +86,9 @@ void DDGPdb::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGPdb::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGPdb to Memory Buffer not yet possible.");
-    return DDGMemoryBuffer(0);
+    if (config.keepLoadedData)
+        return savedData;
+    throw std::runtime_error("Saving DDGPdb to Memory Buffer not yet possible.");
 }
 
 DDGModelSegment DDGPdb::readModelSegment(DDGMemoryBuffer buffer)

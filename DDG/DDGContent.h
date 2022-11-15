@@ -18,6 +18,7 @@ public:
 
 protected:
     DDGLoadingConfig config;
+    DDGMemoryBuffer savedData;
 };
 
 #endif // DDGCONTENT_H

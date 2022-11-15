@@ -33,6 +33,8 @@ private slots:
     void on_actionSet_DAT_as_active_model_lib_triggered();
     void on_actionSet_MAPMODELLUT_as_active_triggered();
 
+    void on_actionSave_DAT_triggered();
+
 private:
     Ui::Inspector *ui;
 
@@ -47,5 +49,6 @@ private:
     std::vector<uint16_t> misc3InContent(DDGContent *c);
 
     DDGContent* selected;
+    QString selectedName;
 };
 #endif // INSPECTOR_H

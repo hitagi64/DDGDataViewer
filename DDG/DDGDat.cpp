@@ -5,6 +5,8 @@
 #include "DDGTrackPoints.h"
 #include "DDGWorldPoints.h"
 #include "DDGMapModelLUT.h"
+#include <fstream>
+#include <cstring>
 
 DDGDat::DDGDat(DDGLoadingConfig config) : DDGContent(config)
 {
@@ -27,19 +29,26 @@ void DDGDat::loadFromFile(std::string filename)
 
 void DDGDat::saveToFile(std::string filename)
 {
-    throw std::string("Saving DDGDat to file not yet possible.");
+    DDGMemoryBuffer outBuffer = saveAsMemoryBuffer();
+    if (outBuffer.getSize() == 0 || outBuffer.getPtr() == 0)
+        throw std::runtime_error("Dat file was empty and cannot be saved.");
+    outBuffer.saveToFile(filename);
 }
 
 void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 {
+    if (config.keepLoadedData)
+        savedData = buffer;
+
     uint32_t baseDatOffset = 0;
 
     // It seems that model files in mapdata have dat objects in their
     //  dat files that have a 4 byte offset. This seems to be the case
     //  only with files in mapdata, so I will associate offsetted dats
     //  as dats containing mapdata.
+    // I do not know what the value in the first 4 bytes is.
     // Also these offsetted dats seem to always have 8 entries in similar
-    //  format, which is convinient.
+    //  format, which is convenient.
     if (buffer.getU8(0) == 'D' &&
         buffer.getU8(1) == 'A' &&
         buffer.getU8(2) == 'T' &&
@@ -57,7 +66,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         containsMapData = true;
     }
     else
-        throw std::string("Dat file header not found.");
+        throw std::runtime_error("Dat file header not found.");
 
     objectCount = buffer.getU32(baseDatOffset + 4);
     for (int i = 0; i < objectCount; i++)
@@ -92,8 +101,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
             {
                 bool match;
                 std::shared_ptr<DDGContent> obj = findAndCreateFromBuffer(config, subBuf, match);
-                if (match)
-                    obj->loadFromMemoryBuffer(subBuf);
+                obj->loadFromMemoryBuffer(subBuf);
                 objects.push_back(obj);
             }
         }
@@ -101,8 +109,7 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
         {
             bool match;
             std::shared_ptr<DDGContent> obj = findAndCreateFromBuffer(config, subBuf, match);
-            if (match)
-                obj->loadFromMemoryBuffer(subBuf);
+            obj->loadFromMemoryBuffer(subBuf);
             objects.push_back(obj);
 
             /*if (i == 2 && isThisDatAreapac())
@@ -123,8 +130,87 @@ void DDGDat::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGDat::saveAsMemoryBuffer()
 {
-    throw std::string("Saving DDGDat to Memory Buffer not yet possible.");
-    return DDGMemoryBuffer(0);
+    std::vector<DDGMemoryBuffer> datItems;
+    for (auto &obj : objects)
+        datItems.push_back(obj->saveAsMemoryBuffer());
+
+    std::vector<uint32_t> alignedSizes;
+
+    uint32_t bufferSize = 0;
+
+    // Header
+    if (containsMapData)
+        bufferSize += 8;
+    else
+        bufferSize += 4;
+
+    bufferSize += 4;// Object count
+    bufferSize += datItems.size() * 8;// Offsets and sizes
+
+    // 16 align the dat header
+    if ((bufferSize%16) != 0)
+        bufferSize += 16-(bufferSize%16);
+
+    uint32_t headerSize = bufferSize;
+
+    for (auto &datItem : datItems)
+    {
+        uint32_t itemSize = datItem.getSize();
+
+        // 16 align the item blocks, because that is what the game seems to do.
+        if (((bufferSize+itemSize)%16) != 0)
+            itemSize += 16-((bufferSize+itemSize)%16);
+
+        alignedSizes.push_back(itemSize);
+        bufferSize += itemSize;
+    }
+
+    DDGMemoryBuffer result(bufferSize);
+    std::memset(result.getPtr(), 0, result.getSize());
+
+    uint32_t bufferCursor = 0;
+
+    // Header
+    if (containsMapData)
+    {
+        result.setU8('D', 4);
+        result.setU8('A', 5);
+        result.setU8('T', 6);
+        result.setU8('\0', 7);
+        bufferCursor += 8;
+    }
+    else
+    {
+        result.setU8('D', 0);
+        result.setU8('A', 1);
+        result.setU8('T', 2);
+        result.setU8('\0', 3);
+        bufferCursor += 4;
+    }
+
+    // Object count
+    result.setU32(datItems.size(), bufferCursor);
+    bufferCursor += 4;
+
+    // Offsets, sizes and objects
+    uint32_t bufferObjectDataCursor = headerSize;
+    for (int i = 0; i < alignedSizes.size(); i++)
+    {
+        // Mapdata dats have 4 bytes at the beginning that the game doesn't count.
+        if (containsMapData)
+            result.setU32(bufferObjectDataCursor-4, bufferCursor);
+        else
+            result.setU32(bufferObjectDataCursor, bufferCursor);
+        result.setU32(alignedSizes[i], bufferCursor+4);
+        bufferCursor += 8;
+        bufferObjectDataCursor += alignedSizes[i];
+        std::memcpy(result.getPtr()+bufferObjectDataCursor,
+                    datItems[i].getPtr(),
+                    datItems[i].getSize()
+                    );
+    }
+
+    return result;
 }
 
 bool DDGDat::possibleMatchForBuffer(DDGMemoryBuffer buffer)
@@ -144,7 +230,8 @@ bool DDGDat::possibleMatchForBuffer(DDGMemoryBuffer buffer)
 
 std::string DDGDat::getInfoAsString()
 {
-    return DDGContent::getInfoAsString() + "\nObject Count: " + std::to_string(objectCount);
+    return DDGContent::getInfoAsString() +
+            "\nObject Count: " + std::to_string(objectCount);
 }
 
 std::vector<std::shared_ptr<DDGContent> > DDGDat::getObjects()
