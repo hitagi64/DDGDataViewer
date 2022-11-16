@@ -4,14 +4,14 @@
 DDGMemoryBuffer::DDGMemoryBuffer()
 {
     bufferData = std::shared_ptr<uint8_t>(new uint8_t[0], std::default_delete<uint8_t[]>());
-    bufferSize = 0;
+    bufferEnd = 0;
     bufferOffset = 0;
 }
 
 DDGMemoryBuffer::DDGMemoryBuffer(size_t size)
 {
     bufferData = std::shared_ptr<uint8_t>(new uint8_t[size], std::default_delete<uint8_t[]>());
-    bufferSize = size;
+    bufferEnd = size;
     bufferOffset = 0;
 }
 
@@ -21,7 +21,7 @@ DDGMemoryBuffer::DDGMemoryBuffer(std::string file)
     if (!f.is_open())
     {
         bufferData = std::shared_ptr<uint8_t>(new uint8_t[0], std::default_delete<uint8_t[]>());
-        bufferSize = 0;
+        bufferEnd = 0;
         bufferOffset = 0;
         return;
     }
@@ -30,7 +30,7 @@ DDGMemoryBuffer::DDGMemoryBuffer(std::string file)
     f.seekg(0, f.beg);
 
     bufferData = std::shared_ptr<uint8_t>(new uint8_t[length], std::default_delete<uint8_t[]>());
-    bufferSize = length;
+    bufferEnd = length;
     bufferOffset = 0;
 
     f.read((char*)bufferData.get(), length);
@@ -41,7 +41,7 @@ DDGMemoryBuffer::DDGMemoryBuffer(std::shared_ptr<uint8_t> bufferData, size_t buf
 {
     // These values are supposed to be verified by what assigns them
     this->bufferData = bufferData;
-    this->bufferSize = bufferSize;
+    this->bufferEnd = bufferSize;
     this->bufferOffset = bufferOffset;
 }
 
@@ -49,23 +49,23 @@ DDGMemoryBuffer DDGMemoryBuffer::getPortion(unsigned long begin, unsigned long e
 {
     if (begin > end)
         throw std::runtime_error("Buffer portion begin can't be higher than it's end.");
-    if (begin < 0 || begin >= bufferSize)
+    if (begin < 0 || begin >= getSize())
         throw std::runtime_error("Buffer not big enough to get portion of begin: " + std::to_string(begin) + " end: " + std::to_string(end));
-    if (end < 0 || end > bufferSize)
+    if (end < 0 || end > getSize())
         throw std::runtime_error("Buffer not big enough to get portion of begin: " + std::to_string(begin) + " end: " + std::to_string(end));
-    return DDGMemoryBuffer(bufferData, end - begin, bufferOffset + begin);
+    return DDGMemoryBuffer(bufferData, bufferOffset + end, bufferOffset + begin);
 }
 
 uint8_t DDGMemoryBuffer::getU8(unsigned long offset)
 {
-    if (offset >= 0 && offset < bufferSize)
+    if (bufferOffset+offset >= 0 && bufferOffset+offset < bufferEnd)
         return bufferData.get()[bufferOffset+offset];
     return 0;
 }
 
 void DDGMemoryBuffer::setU8(uint8_t b, unsigned long offset)
 {
-    if (offset >= 0 && offset < bufferSize)
+    if (bufferOffset+offset >= 0 && bufferOffset+offset < bufferEnd)
         bufferData.get()[bufferOffset+offset] = b;
 }
 
@@ -109,7 +109,7 @@ void DDGMemoryBuffer::saveToFile(std::string filename)
 
 size_t DDGMemoryBuffer::getSize()
 {
-    return bufferSize;
+    return bufferEnd-bufferOffset;
 }
 
 uint8_t *DDGMemoryBuffer::getPtr()

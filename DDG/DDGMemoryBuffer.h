@@ -28,7 +28,7 @@ public:
 
 private:
     std::shared_ptr<uint8_t> bufferData;
-    size_t bufferSize;
+    size_t bufferEnd;
     unsigned long bufferOffset;
 };
 
