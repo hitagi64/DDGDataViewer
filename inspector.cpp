@@ -9,6 +9,7 @@
 #include <QMimeData>
 #include <QGraphicsView>
 #include <algorithm>
+#include <math.h>
 #include "ContentPreviewer.h"
 #include "DDG/DDGPdb.h"
 
@@ -331,7 +332,7 @@ void Inspector::on_actionSave_DAT_triggered()
                     this,
                     "Save Dat file",
                     origFileName,
-                    ".dat",
+                    "*.dat",
                     0,
                     QFileDialog::DontUseNativeDialog
                 ).toStdString();
@@ -357,6 +358,181 @@ void Inspector::on_actionSave_DAT_triggered()
                     "Error",
                     "No item selected or the selected item is not a Dat."
                     );
+    }
+}
+
+void Inspector::saveDDGImageToPNG(DDGImage img)
+{
+    QString origFileName = selectedName;
+    if (origFileName == "")
+        origFileName = "out";
+    origFileName += ".png";
+    QString saveFileName =
+            QFileDialog::getSaveFileName(
+                this,
+                "Save Image file",
+                origFileName,
+                "*.png",
+                0,
+                QFileDialog::DontUseNativeDialog
+            );
+    QImage outImg(img.width, img.height, QImage::Format_RGBA8888);
+    for (int y = 0; y < img.height; y++)
+    {
+        for (int x = 0; x < img.width; x++)
+        {
+            QRgb c = qRgba(
+                        img.data[(y*img.width*4) + (x*4) + 0],
+                        img.data[(y*img.width*4) + (x*4) + 1],
+                        img.data[(y*img.width*4) + (x*4) + 2],
+                        255-(img.data[(y*img.width*4) + (x*4) + 3]*2));
+            outImg.setPixel(x, y, c);
+        }
+    }
+    outImg.save(saveFileName);
+}
+
+QString Inspector::dialogGetFile()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setOption(dialog.DontUseNativeDialog, true);
+    QStringList fileNames;
+    if (dialog.exec())
+        fileNames = dialog.selectedFiles();
+
+    if (fileNames.size() == 0)
+        return "";
+
+    return fileNames[0];
+}
+
+void Inspector::ImageFileToDDGTxm(QString filename, DDGTxm *txm, int option)
+{
+    try {
+
+
+        QImage img;
+        if (!img.load(filename))
+            throw std::runtime_error("Failed to open image.");
+
+        if (option == 1)
+            img = img.scaled(txm->getWidth(), txm->getHeight(), Qt::KeepAspectRatioByExpanding);
+        if (option == 2)
+            img = img.scaled(txm->getWidth(), txm->getHeight());
+        if (option == 3)
+        {
+            float px = std::log2((double)img.width());
+            int pxInt = px;
+            unsigned int newResx = std::pow(2, pxInt);
+
+            float py = std::log2((double)img.height());
+            int pyInt = py;
+            unsigned int newResy = std::pow(2, pyInt);
+            if (newResx < 1 || newResy < 1)
+                throw std::runtime_error("Image size is 0.");
+            img = img.scaled(newResx, newResy);
+        }
+
+        DDGImage ddgImage;
+        ddgImage.width = img.width();
+        ddgImage.height = img.height();
+        for (int y = 0; y < img.height(); y++)
+        {
+            for (int x = 0; x < img.width(); x++)
+            {
+                QRgb c = img.pixel(x, y);
+                ddgImage.data.push_back(qRed(c));
+                ddgImage.data.push_back(qGreen(c));
+                ddgImage.data.push_back(qBlue(c));
+                ddgImage.data.push_back(qAlpha(c));
+            }
+        }
+        txm->loadFromImage(ddgImage);
+    }
+    catch (std::runtime_error e) {
+                QMessageBox messageBox;
+                messageBox.critical(
+                        0,
+                        "Error",
+                        QString::fromStdString(
+                            std::string("An error occured while replacing an image: ")
+                            + e.what()
+                            )
+                        );
+            }
+}
+
+void Inspector::on_actionReplace_triggered()
+{
+    DDGTxm *cT = dynamic_cast<DDGTxm*>(selected);
+    if (cT != nullptr)
+        ImageFileToDDGTxm(dialogGetFile(), cT, 0);
+}
+
+
+void Inspector::on_actionReplace_Keeping_Aspect_triggered()
+{
+    DDGTxm *cT = dynamic_cast<DDGTxm*>(selected);
+    if (cT != nullptr)
+        ImageFileToDDGTxm(dialogGetFile(), cT, 1);
+}
+
+
+void Inspector::on_actionReplace_Keeping_Resolution_triggered()
+{
+    DDGTxm *cT = dynamic_cast<DDGTxm*>(selected);
+    if (cT != nullptr)
+        ImageFileToDDGTxm(dialogGetFile(), cT, 2);
+}
+
+
+void Inspector::on_actionReplace_Convert_to_pow2_triggered()
+{
+    DDGTxm *cT = dynamic_cast<DDGTxm*>(selected);
+    if (cT != nullptr)
+        ImageFileToDDGTxm(dialogGetFile(), cT, 3);
+}
+
+
+void Inspector::on_actionExport_As_PNG_triggered()
+{
+    DDGTxm *cT = dynamic_cast<DDGTxm*>(selected);
+    if (cT != nullptr)
+        saveDDGImageToPNG(cT->convertToImage());
+}
+
+
+void Inspector::on_actionReplace_All_Converting_To_Power_Of_2_triggered()
+{
+    DDGDat *cD = dynamic_cast<DDGDat*>(selected);
+    if (cD != nullptr)
+    {
+        QString filename = dialogGetFile();
+        auto datObjects = cD->getObjects();
+        for (int i = 0; i < datObjects.size(); i++)
+        {
+            DDGTxm *cT = dynamic_cast<DDGTxm*>(datObjects[i].get());
+            if (cT != nullptr)
+                ImageFileToDDGTxm(filename, cT, 3);
+        }
+    }
+}
+
+
+void Inspector::on_actionReplace_All_Keeping_Original_Resolution_triggered()
+{
+    DDGDat *cD = dynamic_cast<DDGDat*>(selected);
+    if (cD != nullptr)
+    {
+        QString filename = dialogGetFile();
+        auto datObjects = cD->getObjects();
+        for (int i = 0; i < datObjects.size(); i++)
+        {
+            DDGTxm *cT = dynamic_cast<DDGTxm*>(datObjects[i].get());
+            if (cT != nullptr)
+                ImageFileToDDGTxm(filename, cT, 2);
+        }
     }
 }
 

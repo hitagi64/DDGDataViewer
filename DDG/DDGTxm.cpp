@@ -241,6 +241,31 @@ DDGImage DDGTxm::convertToImage()
     return image;
 }
 
+void DDGTxm::loadFromImage(DDGImage image)
+{
+    clutWidth = 0;
+    clutHeight = 0;
+    clutPixelType = PSMCT32;
+    clutData = DDGMemoryBuffer();
+
+    imageWidth = image.width;
+    imageHeight = image.height;
+    imagePixelType = PSMCT32;
+    imageData = DDGMemoryBuffer(image.data.size());
+
+    std::memcpy(imageData.getPtr(), image.data.data(), image.data.size());
+}
+
+uint16_t DDGTxm::getWidth()
+{
+    return imageWidth;
+}
+
+uint16_t DDGTxm::getHeight()
+{
+    return imageHeight;
+}
+
 uint8_t DDGTxm::getTxmPixelFormatBitCount(DDGTxmPixelFormat p)
 {
     switch (p) {
