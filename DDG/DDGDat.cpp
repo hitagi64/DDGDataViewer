@@ -7,6 +7,7 @@
 #include "DDGMapModelLUT.h"
 #include <fstream>
 #include <cstring>
+#include <iostream>
 
 DDGDat::DDGDat(DDGLoadingConfig config) : DDGContent(config)
 {
@@ -148,8 +149,16 @@ DDGMemoryBuffer DDGDat::saveAsMemoryBuffer()
     bufferSize += datItems.size() * 8;// Offsets and sizes
 
     // 16 align the dat header
-    if ((bufferSize%16) != 0)
-        bufferSize += 16-(bufferSize%16);
+    if (containsMapData)
+    {
+        if (((bufferSize-4)%16) != 0)
+            bufferSize += 16-((bufferSize-4)%16);
+    }
+    else
+    {
+        if ((bufferSize%16) != 0)
+            bufferSize += 16-(bufferSize%16);
+    }
 
     uint32_t headerSize = bufferSize;
 
@@ -158,14 +167,15 @@ DDGMemoryBuffer DDGDat::saveAsMemoryBuffer()
         uint32_t itemSize = datItem.getSize();
 
         // 16 align the item blocks, because that is what the game seems to do.
-        if (((bufferSize+itemSize)%16) != 0)
-            itemSize += 16-((bufferSize+itemSize)%16);
+        //if (((bufferSize+itemSize)%16) != 0)
+        //    itemSize += 16-((bufferSize+itemSize)%16);
 
         alignedSizes.push_back(itemSize);
         bufferSize += itemSize;
     }
 
     DDGMemoryBuffer result(bufferSize);
+
     std::memset(result.getPtr(), 0, result.getSize());
 
     uint32_t bufferCursor = 0;
@@ -173,23 +183,23 @@ DDGMemoryBuffer DDGDat::saveAsMemoryBuffer()
     // Header
     if (containsMapData)
     {
-        result.setU8('D', 4);
-        result.setU8('A', 5);
-        result.setU8('T', 6);
-        result.setU8('\0', 7);
+        result.setU8(4, 'D');
+        result.setU8(5, 'A');
+        result.setU8(6, 'T');
+        result.setU8(7, '\0');
         bufferCursor += 8;
     }
     else
     {
-        result.setU8('D', 0);
-        result.setU8('A', 1);
-        result.setU8('T', 2);
-        result.setU8('\0', 3);
+        result.setU8(0, 'D');
+        result.setU8(1, 'A');
+        result.setU8(2, 'T');
+        result.setU8(3, '\0');
         bufferCursor += 4;
     }
 
     // Object count
-    result.setU32(datItems.size(), bufferCursor);
+    result.setU32(bufferCursor, datItems.size());
     bufferCursor += 4;
 
     // Offsets, sizes and objects
@@ -198,16 +208,18 @@ DDGMemoryBuffer DDGDat::saveAsMemoryBuffer()
     {
         // Mapdata dats have 4 bytes at the beginning that the game doesn't count.
         if (containsMapData)
-            result.setU32(bufferObjectDataCursor-4, bufferCursor);
+            result.setU32(bufferCursor, bufferObjectDataCursor-4);
         else
-            result.setU32(bufferObjectDataCursor, bufferCursor);
-        result.setU32(alignedSizes[i], bufferCursor+4);
-        bufferCursor += 8;
-        bufferObjectDataCursor += alignedSizes[i];
+            result.setU32(bufferCursor, bufferObjectDataCursor);
+        result.setU32(bufferCursor+4, alignedSizes[i]);
+
         std::memcpy(result.getPtr()+bufferObjectDataCursor,
                     datItems[i].getPtr(),
                     datItems[i].getSize()
                     );
+
+        bufferCursor += 8;
+        bufferObjectDataCursor += alignedSizes[i];
     }
 
     return result;

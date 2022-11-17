@@ -63,7 +63,7 @@ uint8_t DDGMemoryBuffer::getU8(unsigned long offset)
     return 0;
 }
 
-void DDGMemoryBuffer::setU8(uint8_t b, unsigned long offset)
+void DDGMemoryBuffer::setU8(unsigned long offset, uint8_t b)
 {
     if (bufferOffset+offset >= 0 && bufferOffset+offset < bufferEnd)
         bufferData.get()[bufferOffset+offset] = b;
@@ -74,7 +74,7 @@ uint16_t DDGMemoryBuffer::getU16(unsigned long offset)
     return (((uint16_t)getU8(offset+1)) << 8) + ((uint16_t)getU8(offset));
 }
 
-void DDGMemoryBuffer::setU16(uint16_t b, unsigned long offset)
+void DDGMemoryBuffer::setU16(unsigned long offset, uint16_t b)
 {
     setU8(offset, b & 0xff);
     setU8(offset+1, (b >> 8) & 0xff);
@@ -89,7 +89,7 @@ uint32_t DDGMemoryBuffer::getU32(unsigned long offset)
     return ret;
 }
 
-void DDGMemoryBuffer::setU32(uint32_t b, unsigned long offset)
+void DDGMemoryBuffer::setU32(unsigned long offset, uint32_t b)
 {
     setU8(offset, b & 0xff);
     setU8(offset+1, (b >> 8) & 0xff);
@@ -114,7 +114,5 @@ size_t DDGMemoryBuffer::getSize()
 
 uint8_t *DDGMemoryBuffer::getPtr()
 {
-    if (bufferOffset >= getSize())
-        return 0;
-    return &bufferData.get()[bufferOffset];
+    return bufferData.get() + bufferOffset;
 }

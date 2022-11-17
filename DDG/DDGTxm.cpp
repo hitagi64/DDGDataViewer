@@ -50,13 +50,13 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
     clutData = DDGMemoryBuffer(totalClutSize);
     for (int i = 0; i < totalClutSize; i++)
     {
-        clutData.setU8(buffer.getU8(headerSize + i), i);
+        clutData.setU8(i, buffer.getU8(headerSize + i));
     }
 
     imageData = DDGMemoryBuffer(totalImageSize);
     for (int i = 0; i < totalImageSize; i++)
     {
-        imageData.setU8(buffer.getU8(headerSize + totalClutSize + i), i);
+        imageData.setU8(i, buffer.getU8(headerSize + totalClutSize + i));
     }
 }
 

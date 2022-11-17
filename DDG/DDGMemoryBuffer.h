@@ -15,11 +15,11 @@ public:
     DDGMemoryBuffer getPortion(unsigned long begin, unsigned long end);
 
     uint8_t getU8(unsigned long offset);
-    void setU8(uint8_t b, unsigned long offset);
+    void setU8(unsigned long offset, uint8_t b);
     uint16_t getU16(unsigned long offset);
-    void setU16(uint16_t b, unsigned long offset);
+    void setU16(unsigned long offset, uint16_t b);
     uint32_t getU32(unsigned long offset);
-    void setU32(uint32_t b, unsigned long offset);
+    void setU32(unsigned long offset, uint32_t b);
 
     void saveToFile(std::string filename);
 
