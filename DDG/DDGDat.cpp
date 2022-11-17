@@ -175,7 +175,6 @@ DDGMemoryBuffer DDGDat::saveAsMemoryBuffer()
     }
 
     DDGMemoryBuffer result(bufferSize);
-
     std::memset(result.getPtr(), 0, result.getSize());
 
     uint32_t bufferCursor = 0;

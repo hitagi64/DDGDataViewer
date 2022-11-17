@@ -1,4 +1,5 @@
 #include "DDGTxm.h"
+#include <cstring>
 
 DDGTxm::DDGTxm(DDGLoadingConfig config) : DDGContent(config)
 {
@@ -62,9 +63,60 @@ void DDGTxm::loadFromMemoryBuffer(DDGMemoryBuffer buffer)
 
 DDGMemoryBuffer DDGTxm::saveAsMemoryBuffer()
 {
-    if (config.keepLoadedData)
-        return savedData;
-    throw std::runtime_error("Saving DDGTxm to Memory Buffer not yet possible.");
+    uint32_t bufferSize = 0;
+
+    bool oldHeader = false;
+
+    // Header
+    if (oldHeader)
+        bufferSize += 20;
+    else
+        bufferSize += 16;
+
+    bufferSize += clutData.getSize();// Clut
+    bufferSize += imageData.getSize();// Pixels
+
+    DDGMemoryBuffer result(bufferSize);
+    std::memset(result.getPtr(), 0, result.getSize());
+
+    uint32_t bufferCursor = 0;
+
+    if (oldHeader)
+    {
+        if (imagePixelType != PSMT8)
+            throw std::runtime_error("Saving DDGTxm with this image pixel format unsupported with this header type.");
+        result.setU8(0, 'T');
+        result.setU8(1, 'X');
+        result.setU8(2, 'D');
+
+        result.setU8(3, clutWidth);
+        result.setU8(4, clutHeight);
+        result.setU8(5, clutPixelType);
+
+        result.setU16(6, imageWidth);
+        result.setU16(8, imageHeight);
+        result.setU16(16, 65535);
+        bufferCursor += 20;
+    }
+    else
+    {
+        result.setU8(0x0, imagePixelType);
+        result.setU16(0x2, imageWidth);
+        result.setU16(0x4, imageHeight);
+
+        result.setU8(0x8, clutPixelType);
+        result.setU16(0x0A, clutWidth);
+        result.setU16(0x0C, clutHeight);
+        bufferCursor += 16;
+    }
+
+    std::memcpy(result.getPtr()+bufferCursor, clutData.getPtr(), clutData.getSize());
+    bufferCursor += clutData.getSize();
+
+    std::memcpy(result.getPtr()+bufferCursor, imageData.getPtr(), imageData.getSize());
+    bufferCursor += imageData.getSize();
+
+    return result;
 }
 
 bool DDGTxm::possibleMatchForBuffer(DDGMemoryBuffer buffer)
