@@ -4,7 +4,6 @@
 
 DDGWorldPoints::DDGWorldPoints(DDGLoadingConfig config) : DDGContent(config)
 {
-
 }
 
 std::string DDGWorldPoints::getType()

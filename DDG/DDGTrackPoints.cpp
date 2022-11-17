@@ -2,7 +2,6 @@
 
 DDGTrackPoints::DDGTrackPoints(DDGLoadingConfig config) : DDGContent(config)
 {
-
 }
 
 std::string DDGTrackPoints::getType()

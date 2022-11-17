@@ -74,7 +74,7 @@ void ContentPreviewer::loadModelSegment(DDGModelSegment &seg, std::vector<MeshTe
 
 void ContentPreviewer::displayContent(DDGContent *c)
 {
-    // variable c may not be used outside this function
+    // Variable c is not allowed to be used outside this function
     QOpenGLWidget::makeCurrent();
 
     image2DMode = false;
@@ -222,14 +222,14 @@ void ContentPreviewer::displayContent(DDGContent *c)
                         );
             model.transform.rotate(points[i].rotation*57.29577, 0, 1, 0);
 
-            unsigned int modelMapIndex = points[i].modelIndex;//(points[i].b >> bitSlider->value()) & 0x1ff;
+            unsigned int modelMapIndex = points[i].modelIndex;
 
-            int isInvalid = 0;// 0 = valid, 1 = not in model lut, 2 = not in model dat
+            int isInvalid = 0;// 0 = Valid, 1 = Not in model lut, 2 = Not in model dat
             if (modelLUT == 0)
                 break;
             if (modelMapIndex > modelLUT->getEntries().size())
             {
-                std::cerr << "LUT entry " + std::to_string(modelMapIndex) + " for model " + std::to_string(i) + " outside of LUT table." << std::endl;
+                //std::cerr << "LUT entry " + std::to_string(modelMapIndex) + " for model " + std::to_string(i) + " outside of LUT table." << std::endl;
                 isInvalid = 1;
             }
 
@@ -276,28 +276,6 @@ void ContentPreviewer::displayContent(DDGContent *c)
         areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);
         areaPointsMode = true;
     }
-    /*DDGTest *cTest = dynamic_cast<DDGTest*>(c);
-    if (cTest != nullptr)
-    {
-        std::vector<DDGVector3> points = cTest->getPoints();
-
-        std::vector<float> pointsAsFloats;
-        for (int i = 0; i < points.size(); i++)
-        {
-            DDGVector3 p = points[i];
-            pointsAsFloats.push_back(p.x);
-            pointsAsFloats.push_back(p.y);
-            pointsAsFloats.push_back(p.z);
-
-            pointsAsFloats.push_back(0);
-            pointsAsFloats.push_back(1);
-            pointsAsFloats.push_back(1);
-        }
-
-        areaPointsModel = createModel(pointsAsFloats.data(), pointsAsFloats.size()*sizeof(float), pointsAsFloats.size()/6, MODELTYPE_3F_3F, GL_POINTS);
-
-        areaPointsMode = true;
-    }*/
 
     recalculateProjection();
 }
@@ -352,7 +330,6 @@ void ContentPreviewer::initializeGL()
 
     triangle = createModel(vertices, sizeof(vertices),
                            3, MODELTYPE_3F_3F, GL_TRIANGLES);
-    //triangle = createModelIndexed(vertices, sizeof(vertices), indices, sizeof(indices), 9, MODELTYPE_VERTEX3_COLOR3, GL_TRIANGLES);
 
     std::vector<float> planeData = generatePlaneUV();
     imageSurface = createModel(&planeData[0], planeData.size()*sizeof(float),

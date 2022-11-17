@@ -2,7 +2,6 @@
 
 DDGTrack::DDGTrack(DDGLoadingConfig config) : DDGContent(config)
 {
-
 }
 
 std::string DDGTrack::getType()

@@ -2,7 +2,6 @@
 
 DDGPdb::DDGPdb(DDGLoadingConfig config) : DDGContent(config)
 {
-
 }
 
 std::string DDGPdb::getType()

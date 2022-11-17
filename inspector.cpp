@@ -95,7 +95,7 @@ bool Inspector::parseFile(std::string filename)
         success = true;
     }  catch (std::runtime_error e) {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
+        messageBox.critical(0, "Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
     }
     return success;
 }
@@ -183,7 +183,7 @@ void Inspector::on_actionDat_triggered()
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
     }  catch (std::runtime_error e) {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
+        messageBox.critical(0, "Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
     }
 
     renderDat();
@@ -212,7 +212,7 @@ void Inspector::on_actionTxm_triggered()
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
     }  catch (std::runtime_error e) {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
+        messageBox.critical(0, "Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
     }
 
     renderDat();
@@ -241,7 +241,7 @@ void Inspector::on_actionPdb_triggered()
         datNames.push_back(QFileInfo(fileNames[0]).fileName().toStdString());
     }  catch (std::runtime_error e) {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
+        messageBox.critical(0, "Error","An error occured while loading a file: " + QString::fromStdString(e.what()));
     }
 
     renderDat();
@@ -410,8 +410,6 @@ QString Inspector::dialogGetFile()
 void Inspector::ImageFileToDDGTxm(QString filename, DDGTxm *txm, int option)
 {
     try {
-
-
         QImage img;
         if (!img.load(filename))
             throw std::runtime_error("Failed to open image.");
@@ -449,8 +447,7 @@ void Inspector::ImageFileToDDGTxm(QString filename, DDGTxm *txm, int option)
             }
         }
         txm->loadFromImage(ddgImage);
-    }
-    catch (std::runtime_error e) {
+    }  catch (std::runtime_error e) {
                 QMessageBox messageBox;
                 messageBox.critical(
                         0,
@@ -460,7 +457,7 @@ void Inspector::ImageFileToDDGTxm(QString filename, DDGTxm *txm, int option)
                             + e.what()
                             )
                         );
-            }
+    }
 }
 
 void Inspector::on_actionReplace_triggered()

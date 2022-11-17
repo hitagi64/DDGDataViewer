@@ -3,7 +3,6 @@
 
 DDGTxm::DDGTxm(DDGLoadingConfig config) : DDGContent(config)
 {
-
 }
 
 std::string DDGTxm::getType()

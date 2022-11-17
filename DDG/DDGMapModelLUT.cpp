@@ -2,7 +2,6 @@
 
 DDGMapModelLUT::DDGMapModelLUT(DDGLoadingConfig config) : DDGContent(config)
 {
-
 }
 
 std::string DDGMapModelLUT::getType()
