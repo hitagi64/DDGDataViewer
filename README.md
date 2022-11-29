@@ -9,7 +9,7 @@ The standalone library is in the DDG folder and works with any C++11 (or better)
 To compile the program you need qt5, cmake and a C++11 (or better) compiler.
 
 Planned features:
-- Editing and then saving textures
+- Editing and then saving textures (mostly working now)
 - Reading speed limit, station and railway sign data
 - Reading station names if this data exists in the files
 - Reading game audio data (shouldn't be difficult to figure out since VLC can open the games audio files already)
