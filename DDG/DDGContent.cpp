@@ -1,4 +1,5 @@
 #include "DDGContent.h"
+#include <stdexcept>
 
 DDGContent::DDGContent(DDGLoadingConfig config)
 {

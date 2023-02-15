@@ -1,4 +1,5 @@
 #include "DDGTrack.h"
+#include <stdexcept>
 
 DDGTrack::DDGTrack(DDGLoadingConfig config) : DDGContent(config)
 {

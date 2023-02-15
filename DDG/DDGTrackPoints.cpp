@@ -1,4 +1,5 @@
 #include "DDGTrackPoints.h"
+#include <stdexcept>
 
 DDGTrackPoints::DDGTrackPoints(DDGLoadingConfig config) : DDGContent(config)
 {

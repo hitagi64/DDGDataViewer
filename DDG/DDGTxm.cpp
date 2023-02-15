@@ -1,5 +1,6 @@
 #include "DDGTxm.h"
 #include <cstring>
+#include <stdexcept>
 
 DDGTxm::DDGTxm(DDGLoadingConfig config) : DDGContent(config)
 {

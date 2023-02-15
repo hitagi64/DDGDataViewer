@@ -1,4 +1,5 @@
 #include "DDGMapModelLUT.h"
+#include <stdexcept>
 
 DDGMapModelLUT::DDGMapModelLUT(DDGLoadingConfig config) : DDGContent(config)
 {

@@ -1,4 +1,5 @@
 #include "DDGPdb.h"
+#include <stdexcept>
 
 DDGPdb::DDGPdb(DDGLoadingConfig config) : DDGContent(config)
 {
